@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TEJAS RAMANUJAM — Software Engineering Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --void: #000000;
+    --hal: #FF0000;
+    --starlight: #F5F5F5;
+    --orbital: #1565C0;
+    --station: #B0BEC5;
+    --orbital-glow: rgba(21,101,192,0.4);
+    --hal-glow: rgba(255,0,0,0.3);
+  }
+  html { scroll-behavior: smooth; scroll-snap-type: y proximity; background: var(--void); }
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--starlight);
+    background: var(--void);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  section {
+    position: relative;
+    min-height: 100vh;
+    width: 100%;
+    scroll-snap-align: start;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  h1, h2, h3, .font-orbitron { font-family: 'Orbitron', sans-serif; }
+  h2 { font-size: clamp(2rem, 5vw, 4rem); letter-spacing: 0.08em; text-transform: uppercase; }
+  h3 { font-size: clamp(1rem, 2vw, 1.5rem); letter-spacing: 0.12em; text-transform: uppercase; }
+
+  /* ── COLUMN GRID SCAN OVERLAY ── */
+  .scan-overlay {
+    position: fixed; inset:0; pointer-events:none; z-index:9999;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+  }
+
+  /* ── HERO ── */
+  #hero { scroll-snap-align: start; }
+  #hero::after {
+    content:''; position:absolute; inset:0; z-index:1; pointer-events:none;
+    background:
+      radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.5) 80%, rgba(0,0,0,0.85) 100%),
+      linear-gradient(180deg, rgba(5,10,25,0.08) 0%, rgba(5,10,25,0.2) 100%);
+  }
+  #hero-canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
+  .hero-overlay {
+    position:absolute; inset:0; z-index:2;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; pointer-events:none;
+  }
+  .hero-overlay > * { pointer-events:auto; }
+  .hero-name {
+    font-family:'Orbitron',sans-serif; font-size:clamp(2.5rem,8vw,7rem);
+    font-weight:900; letter-spacing:0.2em; color:var(--starlight);
+    text-shadow: 0 0 80px rgba(255,255,255,0.15), 0 0 200px rgba(255,255,255,0.05);
+    opacity:0; animation:heroFadeIn 3s cubic-bezier(0.16,1,0.3,1) 1.5s forwards;
+    line-height:1.1; margin-bottom:0.1em;
+  }
+  .hero-subtitle {
+    font-family:'Inter',sans-serif; font-size:clamp(0.8rem,1.5vw,1.2rem);
+    font-weight:300; letter-spacing:0.15em; color:var(--station);
+    opacity:0; animation:heroFadeIn 3s cubic-bezier(0.16,1,0.3,1) 2.2s forwards;
+    margin-bottom: 3rem;
+  }
+  .hero-cta {
+    opacity:0; animation:heroFadeIn 3s cubic-bezier(0.16,1,0.3,1) 2.8s forwards;
+    pointer-events:auto;
+  }
+  .terminal-ring {
+    width:64px; height:64px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; position:relative;
+    background:none; border:none; outline:none;
+  }
+  .terminal-ring svg { width:100%; height:100%; }
+  .terminal-ring .ring-bg {
+    fill:none; stroke:var(--starlight); stroke-width:1.5;
+  }
+  .terminal-ring .ring-fill {
+    fill:none; stroke:var(--orbital); stroke-width:2;
+    stroke-dasharray: 201; stroke-dashoffset: 201;
+    transition: stroke-dashoffset 1.4s cubic-bezier(0.16,1,0.3,1);
+  }
+  .terminal-ring:hover .ring-fill { stroke-dashoffset:0; }
+  .terminal-ring .ring-arrow {
+    fill:none; stroke:var(--starlight); stroke-width:1.5;
+    transition: stroke 0.4s;
+  }
+  .terminal-ring:hover .ring-arrow { stroke:var(--void); }
+
+  @keyframes heroFadeIn {
+    0% { opacity:0; transform:translateY(20px); filter:blur(8px); }
+    100% { opacity:1; transform:translateY(0); filter:blur(0); }
+  }
+
+  /* ── SECTION LABELS / HEADERS ── */
+  .section-label {
+    font-family:'Orbitron',sans-serif; font-size:0.7rem; letter-spacing:0.3em;
+    color:var(--orbital); text-transform:uppercase;
+    position:absolute; top:3rem; left:3rem; z-index:10;
+  }
+  .section-number {
+    font-family:'Orbitron',sans-serif; font-size:8rem; font-weight:900;
+    color:rgba(255,255,255,0.02);
+    position:absolute; top:1rem; right:2rem; z-index:1; pointer-events:none;
+    line-height:1;
+  }
+
+  /* ── EXPERIENCE SECTION ── */
+  #experience {
+    flex-direction:column; padding:6rem 3rem; gap:3rem;
+  }
+  .xp-grid {
+    display:grid; grid-template-columns:repeat(3,1fr);
+    gap:2rem; width:100%; max-width:1400px; z-index:2;
+  }
+  .xp-card {
+    position:relative; background:rgba(10,10,15,0.85);
+    border:1px solid rgba(176,190,197,0.1);
+    border-radius:2px; overflow:hidden; min-height:420px;
+    display:flex; flex-direction:column;
+    transition: border-color 0.6s, transform 0.6s;
+  }
+  .xp-card:hover { border-color:var(--orbital-glow); transform:translateY(-4px); }
+  .xp-video-wrap {
+    position:relative; width:100%; height:260px; overflow:hidden;
+    background:var(--void);
+  }
+  .xp-video-wrap canvas { width:100%; height:100%; display:block; }
+  .xp-card-body { padding:2rem; flex:1; display:flex; flex-direction:column; }
+  .xp-card-body h3 { color:var(--starlight); margin-bottom:0.5rem; }
+  .xp-card-body .role { color:var(--orbital); font-size:0.85rem; font-weight:500; letter-spacing:0.05em; margin-bottom:0.25rem; }
+  .xp-card-body .date { color:var(--station); font-size:0.7rem; letter-spacing:0.08em; margin-bottom:1rem; }
+  .xp-card-body ul { list-style:none; font-size:0.8rem; color:var(--station); line-height:1.7; }
+  .xp-card-body ul li::before { content:'▸'; color:var(--orbital); margin-right:0.5rem; font-size:0.6rem; }
+  .stats-bar {
+    display:grid; grid-template-columns:repeat(3,1fr);
+    gap:2rem; width:100%; max-width:1400px; z-index:2;
+    border-top:1px solid rgba(176,190,197,0.1);
+    border-bottom:1px solid rgba(176,190,197,0.1);
+    padding:2rem 0;
+  }
+  .stat-item { text-align:center; }
+  .stat-value {
+    font-family:'Orbitron',sans-serif; font-size:clamp(2rem,4vw,3.5rem);
+    font-weight:700; color:var(--starlight);
+    text-shadow: 0 0 30px var(--orbital-glow);
+  }
+  .stat-label { font-size:0.7rem; letter-spacing:0.15em; color:var(--station); margin-top:0.5rem; text-transform:uppercase; }
+
+  /* ── PROJECTS SECTION ── */
+  #projects {
+    flex-direction:column; padding:6rem 3rem; gap:3rem;
+  }
+  .proj-grid {
+    display:grid; grid-template-columns:repeat(3,1fr);
+    gap:2rem; width:100%; max-width:1400px; z-index:2;
+  }
+  .proj-card {
+    position:relative; background:rgba(10,10,15,0.85);
+    border:1px solid rgba(176,190,197,0.1);
+    border-radius:2px; overflow:hidden; min-height:400px;
+    display:flex; flex-direction:column;
+    transition: border-color 0.6s, transform 0.6s;
+  }
+  .proj-card:hover { border-color:rgba(255,0,0,0.2); transform:translateY(-4px); }
+  .proj-video-wrap {
+    position:relative; width:100%; height:240px; overflow:hidden;
+    background:var(--void);
+  }
+  .proj-video-wrap canvas { width:100%; height:100%; display:block; }
+  .proj-card-body { padding:2rem; flex:1; display:flex; flex-direction:column; }
+  .proj-card-body h3 { color:var(--starlight); margin-bottom:0.25rem; }
+  .proj-card-body .tech { color:var(--orbital); font-size:0.7rem; letter-spacing:0.1em; margin-bottom:1rem; }
+  .proj-card-body p { font-size:0.8rem; color:var(--station); line-height:1.7; }
+  .metric-float {
+    position:absolute; top:1rem; right:1rem; z-index:3;
+    font-family:'Orbitron',sans-serif; font-size:1.2rem; font-weight:700;
+    color:var(--hal); text-shadow: 0 0 20px var(--hal-glow);
+    background:rgba(0,0,0,0.7); padding:0.5rem 1rem; border:1px solid rgba(255,0,0,0.3);
+  }
+
+  /* ── TRAINING SECTION ── */
+  #training {
+    flex-direction:column; padding:6rem 3rem; gap:3rem;
+  }
+  .train-grid {
+    display:grid; grid-template-columns:repeat(3,1fr);
+    gap:2rem; width:100%; max-width:1400px; z-index:2;
+  }
+  .train-card {
+    position:relative; background:rgba(10,10,15,0.85);
+    border:1px solid rgba(176,190,197,0.1);
+    border-radius:2px; padding:2.5rem;
+    transition: border-color 0.8s, transform 0.8s cubic-bezier(0.16,1,0.3,1), box-shadow 0.8s;
+    transform: perspective(900px) rotateX(1deg);
+    transform-style: preserve-3d;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .train-card:hover {
+    border-color:rgba(21,101,192,0.3);
+    transform: perspective(900px) rotateX(0deg) translateY(-8px);
+    box-shadow: 0 30px 80px rgba(21,101,192,0.08);
+  }
+  .train-card::before {
+    content:''; position:absolute; inset:0;
+    background:
+      linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.9) 100%),
+      repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(176,190,197,0.03) 28px, rgba(176,190,197,0.03) 29px);
+    pointer-events:none; z-index:0;
+  }
+  .train-card::after {
+    content:''; position:absolute; top:0; left:50%; transform:translateX(-50%);
+    width:1px; height:100%;
+    background:linear-gradient(to bottom, rgba(21,101,192,0.2), transparent 40%, transparent 60%, rgba(21,101,192,0.2));
+    pointer-events:none; z-index:0;
+  }
+  .train-card > * { position:relative; z-index:1; }
+  .train-card h3 { color:var(--starlight); margin-bottom:0.25rem; }
+  .train-card .org { color:var(--orbital); font-size:0.85rem; font-weight:500; margin-bottom:0.25rem; }
+  .train-card .date { color:var(--station); font-size:0.7rem; letter-spacing:0.08em; margin-bottom:1rem; }
+  .train-card p { font-size:0.8rem; color:var(--station); line-height:1.7; }
+  .perspective-metric {
+    font-family:'Orbitron',sans-serif; font-size:2.5rem; font-weight:700;
+    color:var(--orbital); margin-top:1.5rem;
+    text-shadow: 0 0 40px var(--orbital-glow);
+  }
+  .perspective-metric .unit { font-size:0.9rem; font-weight:400; color:var(--station); margin-left:0.25rem; }
+
+  /* ── MISSION CONTROL ── */
+  #mission {
+    flex-direction:column; padding:6rem 3rem; gap:3rem;
+  }
+  .mission-canvas { position:absolute; inset:0; width:100%; height:100%; display:block; z-index:0; opacity:0.6; }
+  .mission-grid {
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:2rem; width:100%; max-width:1400px; z-index:2;
+  }
+  .skills-panel, .contact-panel {
+    background:rgba(10,10,15,0.9);
+    border:1px solid rgba(176,190,197,0.1);
+    border-radius:2px; padding:2.5rem;
+  }
+  .skills-panel h3, .contact-panel h3 {
+    color:var(--orbital); margin-bottom:1.5rem;
+    font-size:0.8rem; letter-spacing:0.2em;
+  }
+  .skills-grid {
+    display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem;
+  }
+  .skill-tag {
+    padding:0.6rem 0.75rem; border:1px solid rgba(176,190,197,0.2);
+    font-size:0.75rem; letter-spacing:0.06em;
+    color:var(--station); text-align:center;
+    transition: all 0.3s; cursor:default;
+  }
+  .skill-tag:hover { border-color:var(--orbital); color:var(--starlight); text-shadow:0 0 10px var(--orbital-glow); }
+  .contact-item {
+    display:flex; align-items:center; gap:1rem;
+    padding:1.25rem 0; border-bottom:1px solid rgba(176,190,197,0.08);
+  }
+  .contact-item:last-child { border-bottom:none; }
+  .contact-value {
+    font-family:'Orbitron',sans-serif; font-size:1.1rem; letter-spacing:0.1em;
+    color:var(--starlight); word-break:break-all;
+  }
+  .contact-label { font-size:0.65rem; letter-spacing:0.2em; color:var(--station); text-transform:uppercase; }
+  .contact-link {
+    font-family:'Orbitron',sans-serif; font-size:0.9rem; letter-spacing:0.08em;
+    color:var(--orbital); text-decoration:none;
+    transition: color 0.3s, text-shadow 0.3s;
+  }
+  .contact-link:hover { color:var(--starlight); text-shadow:0 0 15px var(--orbital-glow); }
+
+  /* ── PARTICLES / AMBIENT ── */
+  .particle-bg { position:absolute; inset:0; pointer-events:none; z-index:0; opacity:0.25; }
+  .particle-bg canvas { width:100%; height:100%; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width:1024px) {
+    .xp-grid, .proj-grid, .train-grid, .mission-grid { grid-template-columns:1fr; }
+    .stats-bar { grid-template-columns:1fr; gap:1.5rem; }
+    .section-number { font-size:4rem; }
+    section { padding:4rem 1.5rem; }
+    #experience, #projects, #training, #mission { padding:4rem 1.5rem; }
+  }
+
+  ::selection { background:var(--orbital); color:var(--starlight); }
+  ::-webkit-scrollbar { width:4px; }
+  ::-webkit-scrollbar-track { background:var(--void); }
+  ::-webkit-scrollbar-thumb { background:var(--station); border-radius:0; }
+
+  /* ── FLOATING DATA STREAMS BACKGROUND ── */
+  .data-streams { position:fixed; inset:0; pointer-events:none; z-index:0; opacity:0.08; }
+  @keyframes stream1 { 0% { transform:translateY(-100%); } 100% { transform:translateY(100vh); } }
+  @keyframes stream2 { 0% { transform:translateY(100%); } 100% { transform:translateY(-100vh); } }
+  .stream-column {
+    position:absolute; top:0; width:1px;
+    background:linear-gradient(to bottom, transparent, var(--orbital), transparent);
+    animation: stream1 linear infinite;
+  }
+</style>
+</head>
+<body>
+
+<!-- Scan line overlay -->
+<div class="scan-overlay"></div>
+
+<!-- Fixed data stream lines -->
+<div class="data-streams" id="dataStreams"></div>
+
+<!-- ══════════════════════════════════════ SECTION 0: HERO ══════════════════════════════════════ -->
+<section id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-overlay">
+    <h1 class="hero-name">TEJAS<br>RAMANUJAM</h1>
+    <p class="hero-subtitle">Bachelor of Science in Software Engineering &mdash; December 2026</p>
+    <a href="#experience" class="hero-cta" aria-label="Scroll to experience">
+      <div class="terminal-ring">
+        <svg viewBox="0 0 64 64">
+          <circle class="ring-bg" cx="32" cy="32" r="30"/>
+          <circle class="ring-fill" cx="32" cy="32" r="30"/>
+          <polyline class="ring-arrow" points="24,32 32,40 40,32" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════ SECTION 1: EXPERIENCE ══════════════════════════════════════ -->
+<section id="experience">
+  <span class="section-label">01 / Professional Experience</span>
+  <span class="section-number">01</span>
+  <div class="xp-grid">
+    <!-- NexRev LLC -->
+    <div class="xp-card">
+      <div class="xp-video-wrap"><canvas id="xp-canvas-0"></canvas></div>
+      <div class="xp-card-body">
+        <span class="date">June 2024 &mdash; August 2024</span>
+        <span class="role">Software Intern</span>
+        <h3>NexRev LLC</h3>
+        <ul>
+          <li>Reformatted 600+ drives for seamless OS migration</li>
+          <li>Cataloged 100+ items with Excel macros</li>
+          <li>Enhanced system stability &amp; efficiency</li>
+        </ul>
+      </div>
+    </div>
+    <!-- Synergy Sparq -->
+    <div class="xp-card">
+      <div class="xp-video-wrap"><canvas id="xp-canvas-1"></canvas></div>
+      <div class="xp-card-body">
+        <span class="date">Oct 2022 &mdash; Jan 2023</span>
+        <span class="role">Software Assistant</span>
+        <h3>Synergy Sparq</h3>
+        <ul>
+          <li>Comprehensive website audits for usability</li>
+          <li>Agile Python automation scripts</li>
+          <li>Streamlined processes &amp; improved productivity</li>
+        </ul>
+      </div>
+    </div>
+    <!-- Bytepoint Consulting -->
+    <div class="xp-card">
+      <div class="xp-video-wrap"><canvas id="xp-canvas-2"></canvas></div>
+      <div class="xp-card-body">
+        <span class="date">May 2021 &mdash; June 2023</span>
+        <span class="role">Cloud Researcher</span>
+        <h3>Bytepoint Consulting</h3>
+        <ul>
+          <li>AWS cloud development research</li>
+          <li>Developed 4+ intro-level labs (Python, JS)</li>
+          <li>Contributed to online course creation</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-value" data-target="3.87" data-suffix="">3.87</div>
+      <div class="stat-label">GPA</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" data-target="600" data-suffix="+">600+</div>
+      <div class="stat-label">Drives Reformatted</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" data-target="100" data-suffix="+">100+</div>
+      <div class="stat-label">Items Cataloged</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════ SECTION 2: PROJECTS ══════════════════════════════════════ -->
+<section id="projects">
+  <span class="section-label">02 / The Projects</span>
+  <span class="section-number">02</span>
+  <div class="proj-grid">
+    <!-- Prophecy ML -->
+    <div class="proj-card">
+      <div class="proj-video-wrap">
+        <canvas id="proj-canvas-0"></canvas>
+        <div class="metric-float">95% ACCURACY</div>
+      </div>
+      <div class="proj-card-body">
+        <span class="tech">FastAPI / React / TypeScript / LightGBM</span>
+        <h3>Prophecy ML/AI Risk Assessor</h3>
+        <p>Python ML Financial Assessor with PostgreSQL — LightGBM model leveraging Kaggle's Home Credit Default Risk dataset. Secured scalable AI financial prediction for underbanked populations.</p>
+      </div>
+    </div>
+    <!-- PostgreSQL Nodes -->
+    <div class="proj-card">
+      <div class="proj-video-wrap">
+        <canvas id="proj-canvas-1"></canvas>
+      </div>
+      <div class="proj-card-body">
+        <span class="tech">PostgreSQL / FastAPI / Docker</span>
+        <h3>Financial Data Nodes</h3>
+        <p>Scalable financial database architecture with floating data nodes and secure query pipelines. Containerized deployment via Docker for cross-environment consistency.</p>
+      </div>
+    </div>
+    <!-- Fool's Gold -->
+    <div class="proj-card">
+      <div class="proj-video-wrap">
+        <canvas id="proj-canvas-2"></canvas>
+      </div>
+      <div class="proj-card-body">
+        <span class="tech">C# / Visual Studio / GitHub</span>
+        <h3>Fool's Gold</h3>
+        <p>Side-scroller game built in C# with Visual Studio. Presented to a 100+ person conference. GitHub-managed codebase with collaborative version control.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════ SECTION 3: TRAINING ══════════════════════════════════════ -->
+<section id="training">
+  <span class="section-label">03 / Training &amp; Organizations</span>
+  <span class="section-number">03</span>
+  <div class="train-grid">
+    <div class="train-card">
+      <span class="date">May 2024 &mdash; Present</span>
+      <span class="org">University of Texas at Dallas</span>
+      <h3>The Design Society</h3>
+      <p>Founder, Events and Logistics Director — Directed event planning to coordinate 10+ workshops, driving a 30% increase in membership.</p>
+      <div class="perspective-metric">10<span class="unit">+ Workshops</span></div>
+    </div>
+    <div class="train-card">
+      <span class="date">March 2024 &mdash; Present</span>
+      <span class="org">University of Texas at Dallas</span>
+      <h3>Nebula Labs</h3>
+      <p>Treasurer — Managed a $3,000 annual budget, securing additional funding for a 25% increase in available funds.</p>
+      <div class="perspective-metric">$3K<span class="unit">Budget</span></div>
+    </div>
+    <div class="train-card">
+      <span class="date">Aug 2021 &mdash; Present</span>
+      <span class="org">University of Texas at Dallas</span>
+      <h3>DECA</h3>
+      <p>Vice President of Marketing — Spearheaded marketing initiatives driving a 20% increase in event participation.</p>
+      <div class="perspective-metric">20%<span class="unit">Participation Increase</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════ SECTION 4: MISSION CONTROL ══════════════════════════════════════ -->
+<section id="mission">
+  <canvas class="mission-canvas" id="mission-canvas"></canvas>
+  <span class="section-label">04 / Mission Control</span>
+  <span class="section-number">04</span>
+  <div class="mission-grid">
+    <div class="skills-panel">
+      <h3>&#x25B6; TECHNICAL SKILLS</h3>
+      <div class="skills-grid" id="skillsGrid"></div>
+    </div>
+    <div class="contact-panel">
+      <h3>&#x25B6; CONTACT COORDINATES</h3>
+      <div class="contact-item">
+        <div><div class="contact-label">PHONE</div><div class="contact-value">612-978-0228</div></div>
+      </div>
+      <div class="contact-item">
+        <div><div class="contact-label">EMAIL</div><div class="contact-value">tejasrama143@gmail.com</div></div>
+      </div>
+      <div class="contact-item">
+        <div><div class="contact-label">LINKEDIN</div><a class="contact-link" href="https://linkedin.com/in/tejas-ramanujam" target="_blank" rel="noopener">linkedin.com/in/tejas-ramanujam</a></div>
+      </div>
+      <div class="contact-item">
+        <div><div class="contact-label">GITHUB</div><a class="contact-link" href="https://github.com/TejasRamanujam" target="_blank" rel="noopener">github.com/TejasRamanujam</a></div>
+      </div>
+      <div class="contact-item">
+        <div><div class="contact-label">LOCATION</div><div class="contact-value">Dallas - Fort Worth Metroplex</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ THREE.JS + CANVAS ANIMATIONS ═══════════════════ -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+
+// ──────────────────────── HERO: 3D SERVER MONOLITH ────────────────────────
+const heroCanvas = document.getElementById('hero-canvas');
+const heroRenderer = new THREE.WebGLRenderer({ canvas: heroCanvas, antialias: true, alpha: false });
+heroRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+heroRenderer.setSize(window.innerWidth, window.innerHeight);
+heroRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+heroRenderer.toneMappingExposure = 1.2;
+
+const heroScene = new THREE.Scene();
+heroScene.background = new THREE.Color(0x000000);
+heroScene.fog = new THREE.FogExp2(0x000000, 0.00025);
+
+const heroCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+heroCamera.position.set(0, 1.2, 8);
+heroCamera.lookAt(0, 0.5, 0);
+
+// Lighting — cool blue cast, high contrast
+const heroAmbient = new THREE.AmbientLight(0x0a1628, 0.6);
+heroScene.add(heroAmbient);
+const heroKey = new THREE.DirectionalLight(0xc8d6e5, 4);
+heroKey.position.set(5, 8, 5);
+heroScene.add(heroKey);
+const heroRim = new THREE.DirectionalLight(0x1565C0, 2.5);
+heroRim.position.set(-3, 2, -4);
+heroScene.add(heroRim);
+const heroBottom = new THREE.PointLight(0x000000, 0);
+heroScene.add(heroBottom);
+
+// Server room floor grid
+const floorGeo = new THREE.PlaneGeometry(30, 30);
+const floorMat = new THREE.ShaderMaterial({
+  uniforms: { uTime: { value: 0 }, uColor: { value: new THREE.Color(0x0a1628) } },
+  vertexShader: `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+    }
+  `,
+  fragmentShader: `
+    varying vec2 vUv;
+    uniform float uTime;
+    uniform vec3 uColor;
+    void main() {
+      vec2 grid = abs(fract(vUv * 30.0 - 0.5) - 0.5);
+      float line = min(grid.x, grid.y);
+      float alpha = 0.04 * (1.0 - line * 30.0);
+      gl_FragColor = vec4(uColor, alpha);
+    }
+  `,
+  transparent: true, depthWrite: false
+});
+const floor = new THREE.Mesh(floorGeo, floorMat);
+floor.rotation.x = -Math.PI / 2;
+floor.position.y = -3;
+heroScene.add(floor);
+
+// Silver server monolith
+const monoGroup = new THREE.Group();
+heroScene.add(monoGroup);
+
+const monoGeo = new THREE.BoxGeometry(0.8, 3.5, 0.8, 8, 8, 8);
+const monoMat = new THREE.MeshStandardMaterial({
+  color: 0xC0C8D0,
+  roughness: 0.15,
+  metalness: 0.95
+});
+const monolith = new THREE.Mesh(monoGeo, monoMat);
+monoGroup.add(monolith);
+
+// LED strips along monolith edges — crawling lights
+const ledPositions = [];
+const ledsPerEdge = 30;
+const monoHeight = 3.5;
+for (let edge = 0; edge < 4; edge++) {
+  const x = edge === 0 ? 0.41 : edge === 1 ? -0.41 : edge === 2 ? 0.41 : -0.41;
+  const z = edge === 0 ? 0.41 : edge === 1 ? 0.41 : edge === 2 ? -0.41 : -0.41;
+  for (let i = 0; i < ledsPerEdge; i++) {
+    ledPositions.push({ x, y: -monoHeight/2 + (i / (ledsPerEdge - 1)) * monoHeight, z, edge });
+  }
+}
+const ledGroup = new THREE.Group();
+monoGroup.add(ledGroup);
+const ledGeos = ledPositions.map((pos, idx) => {
+  const geo = new THREE.SphereGeometry(0.015, 4, 4);
+  const mat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+  const led = new THREE.Mesh(geo, mat);
+  led.position.set(pos.x, pos.y, pos.z);
+  led.userData = { index: idx, edge: pos.edge, baseTime: idx * 0.015 };
+  return led;
+});
+ledGeos.forEach(l => ledGroup.add(l));
+
+// Rotating database matrix (floating geometric nodes)
+const matrixGroup = new THREE.Group();
+matrixGroup.position.set(0, 0.4, 2.5);
+monoGroup.add(matrixGroup);
+const matrixNodes = [];
+const matrixSize = 7;
+for (let x = 0; x < matrixSize; x++) {
+  for (let y = 0; y < matrixSize; y++) {
+    for (let z = 0; z < 3; z++) {
+      const nodeGeo = new THREE.BoxGeometry(0.06, 0.06, 0.06);
+      const nodeMat = new THREE.MeshStandardMaterial({
+        color: x % 3 === 0 ? 0x1565C0 : 0xFF0000,
+        emissive: x % 3 === 0 ? 0x041830 : 0x300000,
+        emissiveIntensity: 0.5,
+        roughness: 0.3,
+        metalness: 0.6
+      });
+      const node = new THREE.Mesh(nodeGeo, nodeMat);
+      node.position.set(
+        (x - Math.floor(matrixSize/2)) * 0.22,
+        (y - Math.floor(matrixSize/2)) * 0.22,
+        z * 0.3
+      );
+      matrixNodes.push(node);
+      matrixGroup.add(node);
+    }
+  }
+}
+
+// Orbiting data ring
+const ringGeo = new THREE.TorusGeometry(1.5, 0.01, 16, 120);
+const ringMat = new THREE.MeshBasicMaterial({ color: 0x1565C0, transparent: true, opacity: 0.5 });
+const ring = new THREE.Mesh(ringGeo, ringMat);
+ring.rotation.x = Math.PI / 2;
+matrixGroup.add(ring);
+
+const ring2Geo = new THREE.TorusGeometry(1.7, 0.008, 16, 100);
+const ring2Mat = new THREE.MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 0.25 });
+const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
+ring2.rotation.x = Math.PI / 3;
+ring2.rotation.y = Math.PI / 4;
+matrixGroup.add(ring2);
+
+// Particle field — background data stars
+const particlesGeo = new THREE.BufferGeometry();
+const particlesCount = 2000;
+const particlesPositions = new Float32Array(particlesCount * 3);
+for (let i = 0; i < particlesCount; i++) {
+  particlesPositions[i * 3] = (Math.random() - 0.5) * 20;
+  particlesPositions[i * 3 + 1] = (Math.random() - 0.5) * 15;
+  particlesPositions[i * 3 + 2] = (Math.random() - 0.5) * 12;
+}
+particlesGeo.setAttribute('position', new THREE.BufferAttribute(particlesPositions, 3));
+const particlesMat = new THREE.PointsMaterial({
+  color: 0x1565C0,
+  size: 0.015,
+  transparent: true,
+  opacity: 0.6,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false
+});
+const particles = new THREE.Points(particlesGeo, particlesMat);
+heroScene.add(particles);
+
+// ──────────────────────── CANVAS 2D PANEL ANIMATIONS ────────────────────────
+
+// XP Canvas 0: Sterile NexRev server environment
+function drawXPVideo0(canvas, time) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, w, h);
+
+  // Grid floor receding into distance
+  const gridColor = 'rgba(21,101,192,0.25)';
+  const vanishX = w / 2, vanishY = h * 0.2;
+  ctx.strokeStyle = gridColor;
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i < 20; i++) {
+    const t = i / 19;
+    const y = vanishY + t * h * 2;
+    ctx.beginPath();
+    ctx.moveTo(vanishX + (vanishX - 40) * t * 2, y);
+    ctx.lineTo(vanishX - (vanishX - 40) * t * 2, y);
+    ctx.stroke();
+    const x = vanishX + (i % 2 ? 1 : -1) * (vanishX) * t;
+    ctx.beginPath();
+    ctx.moveTo(x, vanishY + t * h * 1.5);
+    ctx.lineTo(x, vanishY + t * h * 2);
+    ctx.stroke();
+  }
+
+  // Server rack silhouettes
+  ctx.fillStyle = 'rgba(5,8,15,0.9)';
+  const rackX = w * 0.15, rackW = w * 0.12, rackH = h * 0.5;
+  for (let r = 0; r < 5; r++) {
+    const rx = rackX + r * w * 0.15;
+    ctx.fillRect(rx, h * 0.3, rackW, rackH);
+    // Blinking LEDs across rack
+    for (let j = 0; j < 12; j++) {
+      const ly = h * 0.3 + j * (rackH / 12) + rackH / 24;
+      const blink = Math.sin(time * 3 + r * 0.7 + j * 0.5) > 0 ? true : Math.sin(time * 7 + r + j) > 0.3;
+      ctx.fillStyle = blink ? 'rgba(255,0,0,0.7)' : 'rgba(21,101,192,0.3)';
+      ctx.fillRect(rx + rackW * 0.3, ly, 3, 2);
+    }
+  }
+
+  // Flowing data streams horizontally
+  for (let s = 0; s < 4; s++) {
+    const sy = h * 0.45 + s * 25;
+    const offset = (time * 80 + s * 200) % (w + 200) - 100;
+    ctx.strokeStyle = `rgba(176,190,197,0.15)`;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let dx = 0; dx < w; dx += 4) {
+      const ry = sy + Math.sin(dx * 0.02 + time * 2 + s) * 3;
+      if (dx === 0) ctx.moveTo(dx, ry);
+      else ctx.lineTo(dx, ry);
+    }
+    ctx.stroke();
+  }
+
+  // Scanning line
+  const scanY = (time * 40) % h;
+  ctx.fillStyle = 'rgba(21,101,192,0.08)';
+  ctx.fillRect(0, scanY, w, 2);
+}
+
+// XP Canvas 1: Agile Python automation script scrolling
+function drawXPVideo1(canvas, time) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.fillStyle = '#020508';
+  ctx.fillRect(0, 0, w, h);
+
+  // Code editor background with line numbers
+  ctx.fillStyle = 'rgba(10,12,20,0.95)';
+  ctx.fillRect(w * 0.08, 0, w * 0.84, h);
+  // Line number gutter
+  ctx.fillStyle = 'rgba(21,101,192,0.15)';
+  ctx.fillRect(w * 0.08, 0, w * 0.06, h);
+
+  // Scrolling code lines
+  const codeLines = [
+    'def automate_workflow(data):', '    # Agile sprint automation',
+    '    pipeline = SynergySparq()', '    for task in backlog.sprints():',
+    '        result = pipeline.process(task)', '        if result.status == "pass":',
+    '            log_success(task.id, result)', '            deploy_to_production(result)',
+    '        else:', '            notify_team(task, result)',
+    '    return report.generate()', '', '# CI/CD integration complete',
+    'if __name__ == "__main__":', '    automate_workflow(sprint_data)'
+  ];
+  const lineH = 22;
+  const startY = ((time * 30) % (lineH * codeLines.length)) - lineH * codeLines.length;
+
+  ctx.font = '11px "Courier New", monospace';
+  for (let i = 0; i < codeLines.length; i++) {
+    const y = startY + i * lineH;
+    if (y > -lineH && y < h + lineH) {
+      // Line number
+      ctx.fillStyle = 'rgba(176,190,197,0.3)';
+      ctx.fillText(String(i + 1).padStart(2, ' '), w * 0.095, y);
+      // Code text
+      const line = codeLines[i];
+      if (line.startsWith('    ')) {
+        ctx.fillStyle = line.includes('#') ? 'rgba(176,190,197,0.3)' : 'rgba(176,190,197,0.6)';
+      } else if (line.startsWith('def')) {
+        ctx.fillStyle = 'rgba(21,101,192,0.8)';
+      } else if (line.startsWith('if')) {
+        ctx.fillStyle = 'rgba(255,0,0,0.6)';
+      } else {
+        ctx.fillStyle = 'rgba(176,190,197,0.4)';
+      }
+      if (line) ctx.fillText(line, w * 0.16, y);
+    }
+  }
+
+  // Cursor blink
+  const cursorBlink = Math.sin(time * 5) > -0.2;
+  if (cursorBlink) {
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.fillRect(w * 0.16 + ctx.measureText(codeLines[0]).width, h * 0.48 - 12, 2, 14);
+  }
+}
+
+// XP Canvas 2: Bytepoint AWS cloud structures
+function drawXPVideo2(canvas, time) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.fillStyle = '#000510';
+  ctx.fillRect(0, 0, w, h);
+
+  // Cloud node network
+  const nodes = [
+    { x: w*0.2, y: h*0.3 }, { x: w*0.5, y: h*0.2 }, { x: w*0.8, y: h*0.35 },
+    { x: w*0.3, y: h*0.6 }, { x: w*0.55, y: h*0.5 }, { x: w*0.75, y: h*0.65 },
+    { x: w*0.15, y: h*0.8 }, { x: w*0.45, y: h*0.8 }, { x: w*0.65, y: h*0.45 },
+    { x: w*0.85, y: h*0.55 },
+  ];
+
+  // Connections
+  ctx.strokeStyle = 'rgba(21,101,192,0.15)';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const dist = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y);
+      if (dist < w * 0.3) {
+        ctx.beginPath();
+        ctx.moveTo(nodes[i].x, nodes[i].y);
+        ctx.lineTo(nodes[j].x, nodes[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+
+  // Pulsing nodes
+  nodes.forEach((n, i) => {
+    const pulse = Math.sin(time * 1.5 + i * 0.8) * 0.5 + 0.5;
+    const radius = 3 + pulse * 5;
+    const alpha = 0.2 + pulse * 0.4;
+    ctx.fillStyle = `rgba(21,101,192,${alpha})`;
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, radius + 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#F5F5F5';
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, 2, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // AWS service logos as flowing text streams
+  const awsServices = ['EC2', 'S3', 'Lambda', 'RDS', 'DynamoDB', 'CloudFront'];
+  ctx.font = '9px "Inter", sans-serif';
+  ctx.fillStyle = 'rgba(176,190,197,0.35)';
+  for (let s = 0; s < awsServices.length; s++) {
+    const x = ((time * 40 + s * 180) % (w + 200)) - 100;
+    const y = h * 0.15 + s * (h * 0.7 / awsServices.length);
+    ctx.fillText(`[ ${awsServices[s]} ]`, x, y);
+  }
+}
+
+// Project Canvas 0: LightGBM prediction models orbiting
+function drawProjCanvas0(canvas, time) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.fillStyle = '#000308';
+  ctx.fillRect(0, 0, w, h);
+
+  // Central prediction node
+  const cx = w/2, cy = h/2;
+  const glowRadius = 40 + Math.sin(time * 0.5) * 10;
+  const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowRadius);
+  gradient.addColorStop(0, 'rgba(21,101,192,0.3)');
+  gradient.addColorStop(0.5, 'rgba(21,101,192,0.1)');
+  gradient.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.arc(cx, cy, glowRadius, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Orbiting prediction nodes
+  const orbits = [
+    { radius: 60, speed: 0.4, color: '#1565C0', size: 4 },
+    { radius: 85, speed: -0.3, color: '#FF0000', size: 3 },
+    { radius: 110, speed: 0.25, color: '#F5F5F5', size: 2.5 },
+    { radius: 70, speed: -0.35, color: '#B0BEC5', size: 3.5 },
+  ];
+
+  // Orbit circles
+  orbits.forEach(o => {
+    ctx.strokeStyle = `rgba(176,190,197,0.06)`;
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.arc(cx, cy, o.radius, 0, Math.PI * 2);
+    ctx.stroke();
+  });
+
+  // Moving nodes
+  orbits.forEach((o, i) => {
+    const angle = time * o.speed + i * Math.PI * 0.5;
+    const x = cx + Math.cos(angle) * o.radius;
+    const y = cy + Math.sin(angle) * o.radius;
+    ctx.fillStyle = o.color;
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = o.color;
+    ctx.beginPath();
+    ctx.arc(x, y, o.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  });
+
+  // Data flow lines from orbit to center
+  ctx.strokeStyle = 'rgba(21,101,192,0.08)';
+  ctx.lineWidth = 0.5;
+  for (let a = 0; a < 8; a++) {
+    const angle = (a / 8) * Math.PI * 2 + time * 0.1;
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(angle) * 30, cy + Math.sin(angle) * 30);
+    ctx.lineTo(cx + Math.cos(angle) * 120, cy + Math.sin(angle) * 120);
+    ctx.stroke();
+  }
+
+  // Cascading numbers
+  ctx.font = '8px "Orbitron", sans-serif';
+  ctx.fillStyle = 'rgba(21,101,192,0.2)';
+  for (let n = 0; n < 20; n++) {
+    const nx = ((time * 50 + n * 70) % w);
+    const ny = (n * 25 + time * 30) % h;
+    ctx.fillText((Math.random() * 2).toFixed(3), nx, ny);
+  }
+}
+
+// Project Canvas 1: PostgreSQL floating data nodes
+function drawProjCanvas1(canvas, time) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.fillStyle = '#000408';
+  ctx.fillRect(0, 0, w, h);
+
+  // Floating data nodes in 3D space (simulated)
+  const nodes = [];
+  for (let i = 0; i < 30; i++) {
+    nodes.push({
+      x: w * 0.1 + Math.random() * w * 0.8,
+      y: h * 0.1 + Math.random() * h * 0.8,
+      z: Math.random(), speed: 0.2 + Math.random() * 0.3,
+      phase: Math.random() * Math.PI * 2
+    });
+  }
+
+  // Connections between close nodes
+  ctx.strokeStyle = 'rgba(21,101,192,0.08)';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const dist = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y);
+      if (dist < 120) {
+        ctx.beginPath();
+        ctx.moveTo(nodes[i].x, nodes[i].y);
+        ctx.lineTo(nodes[j].x, nodes[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+
+  // Floating node boxes
+  nodes.forEach(n => {
+    const floatY = Math.sin(time * n.speed + n.phase) * 8;
+    const scale = 0.6 + n.z * 0.6;
+    const alpha = 0.3 + n.z * 0.4;
+    ctx.fillStyle = `rgba(21,101,192,${alpha})`;
+    ctx.fillRect(n.x - 8 * scale, n.y + floatY - 6 * scale, 16 * scale, 12 * scale);
+    ctx.strokeStyle = `rgba(245,245,245,${alpha * 0.5})`;
+    ctx.strokeRect(n.x - 8 * scale, n.y + floatY - 6 * scale, 16 * scale, 12 * scale);
+
+    // Data labels on nodes
+    ctx.fillStyle = `rgba(245,245,245,${alpha * 0.6})`;
+    ctx.font = `${6 * scale}px "Inter", sans-serif`;
+    ctx.fillText('data', n.x - 8 * scale, n.y + floatY + 3 * scale);
+  });
+}
+
+// Project Canvas 2: Fool's Gold C# side-scroller
+function drawProjCanvas2(canvas, time) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, w, h);
+
+  // Side-scroller ground
+  const groundY = h * 0.75;
+  ctx.fillStyle = 'rgba(21,101,192,0.1)';
+  ctx.fillRect(0, groundY, w, h - groundY);
+  ctx.strokeStyle = 'rgba(176,190,197,0.15)';
+  ctx.beginPath();
+  ctx.moveTo(0, groundY);
+  ctx.lineTo(w, groundY);
+  ctx.stroke();
+
+  // Scrolling platforms (side-scroller style)
+  for (let p = 0; p < 5; p++) {
+    const px = ((time * 60 + p * 250) % (w + 200)) - 100;
+    const py = groundY - 60 - p * 25;
+    ctx.strokeStyle = 'rgba(176,190,197,0.25)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(px, py, 80, 8);
+  }
+
+  // Character (small square avatar)
+  const charX = w * 0.2;
+  const charY = groundY - 25 + Math.sin(time * 3) * 3;
+  ctx.fillStyle = '#FF0000';
+  ctx.fillRect(charX - 6, charY - 6, 12, 12);
+  ctx.fillStyle = '#F5F5F5';
+  ctx.fillRect(charX - 3, charY - 3, 3, 3);
+  ctx.fillRect(charX + 1, charY - 3, 3, 3);
+
+  // Collectibles (gold coins)
+  for (let g = 0; g < 8; g++) {
+    const gx = ((time * 80 + g * 180) % (w + 200)) - 100;
+    const gy = groundY - 40 - (g % 3) * 40 + Math.sin(time * 2 + g) * 10;
+    ctx.fillStyle = '#FFD700';
+    ctx.beginPath();
+    ctx.arc(gx, gy, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Score display
+  ctx.font = '10px "Orbitron", sans-serif';
+  ctx.fillStyle = 'rgba(255,0,0,0.7)';
+  ctx.fillText(`SCORE: ${Math.floor(time * 100) % 10000}`, w * 0.7, 25);
+}
+
+// ──────────────────────── MISSION CONTROL CANVAS ────────────────────────
+
+function drawMissionCanvas(canvas, time) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, w, h);
+
+  // Flickering control room grid
+  ctx.strokeStyle = 'rgba(21,101,192,0.08)';
+  ctx.lineWidth = 0.5;
+  for (let x = 0; x < w; x += 40) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, h);
+    ctx.stroke();
+  }
+  for (let y = 0; y < h; y += 40) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+  }
+
+  // Random flickering blocks
+  const flickerCount = 15;
+  for (let f = 0; f < flickerCount; f++) {
+    const flicker = Math.sin(time * 7 + f * 1.3) > 0.5;
+    if (flicker) {
+      const fx = ((f * 131 + 71) % Math.floor(w / 40)) * 40;
+      const fy = ((f * 97 + 43) % Math.floor(h / 40)) * 40;
+      ctx.fillStyle = `rgba(21,101,192,${0.03 + Math.random() * 0.05})`;
+      ctx.fillRect(fx, fy, 40, 40);
+    }
+  }
+
+  // Moving radar sweep
+  const radarX = w * 0.08, radarY = h * 0.85, radarR = 50;
+  ctx.strokeStyle = 'rgba(21,101,192,0.2)';
+  ctx.beginPath();
+  ctx.arc(radarX, radarY, radarR, 0, Math.PI * 2);
+  ctx.stroke();
+  for (let r = 0; r < 3; r++) {
+    ctx.beginPath();
+    ctx.arc(radarX, radarY, radarR * (r + 1) / 3, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  // Sweep line
+  const sweepAngle = time * 1.5;
+  ctx.strokeStyle = 'rgba(21,101,192,0.5)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(radarX, radarY);
+  ctx.lineTo(radarX + Math.cos(sweepAngle) * radarR, radarY + Math.sin(sweepAngle) * radarR);
+  ctx.stroke();
+
+  // Technical data streams on the right
+  ctx.font = '8px "Courier New", monospace';
+  ctx.fillStyle = 'rgba(176,190,197,0.2)';
+  const dataLines = [
+    'SYS: ONLINE', 'CPU: 23%', 'MEM: 1.4/4.0 GB', 'NET: TX 4.2 MB/s',
+    'DISK: 87% AVAIL', 'PROC: 143', 'LOAD: 0.42', 'UPTIME: 14d 6h',
+    `TEMP: ${(42 + Math.sin(time)*3).toFixed(1)}C`,
+  ];
+  dataLines.forEach((line, i) => {
+    ctx.fillText(line, w * 0.85, h * 0.12 + i * 18);
+  });
+}
+
+// ──────────────────────── CANVAS SETUP ────────────────────────
+
+function setupCanvas(canvas, w, h) {
+  const dpr = Math.min(window.devicePixelRatio, 2);
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  return { w, h };
+}
+
+const xpCanvases = [];
+const projCanvases = [];
+let missionCanvasData;
+
+function initCanvases() {
+  document.querySelectorAll('.xp-video-wrap canvas').forEach((c, i) => {
+    const wrap = c.parentElement;
+    const rect = wrap.getBoundingClientRect();
+    xpCanvases[i] = setupCanvas(c, rect.width, rect.height);
+  });
+  document.querySelectorAll('.proj-video-wrap canvas').forEach((c, i) => {
+    const wrap = c.parentElement;
+    const rect = wrap.getBoundingClientRect();
+    projCanvases[i] = setupCanvas(c, rect.width, rect.height);
+  });
+  const mc = document.getElementById('mission-canvas');
+  missionCanvasData = setupCanvas(mc, window.innerWidth, window.innerHeight);
+}
+
+// ──────────────────────── ANIMATION LOOP ────────────────────────
+const clock = new THREE.Clock();
+let animTime = 0;
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  const delta = clock.getDelta();
+  const elapsed = clock.getElapsedTime();
+  animTime = elapsed;
+
+  // ── HERO ANIMATION ──
+  monoGroup.rotation.y += delta * 0.12;
+  monolith.rotation.y = 0;
+  monoGroup.position.y = Math.sin(elapsed * 0.15) * 0.15;
+
+  // LED crawling effect
+  ledGeos.forEach(led => {
+    const phase = (elapsed * 1.5 + led.userData.index * 0.03) % (ledsPerEdge * 0.06);
+    const brightness = phase < 0.02 ? 1 : 0.02;
+    led.material.color.setRGB(brightness, 0, 0);
+    led.material.opacity = brightness;
+  });
+
+  // Matrix rotation
+  matrixGroup.rotation.y += delta * 0.25;
+  matrixGroup.rotation.x = Math.sin(elapsed * 0.2) * 0.15;
+  ring.rotation.z += delta * 0.15;
+  ring2.rotation.z -= delta * 0.1;
+
+  // Scale matrix nodes (growing larger over time)
+  const scale = 1 + Math.sin(elapsed * 0.3) * 0.4 + (elapsed * 0.02 % 2);
+  matrixNodes.forEach((n, i) => {
+    const s = scale + Math.sin(elapsed * 0.5 + i * 0.1) * 0.3;
+    n.scale.setScalar(Math.max(0.5, Math.min(2.5, s)));
+  });
+
+  // Camera slow forward dolly
+  heroCamera.position.z = 8 - Math.min(2, elapsed * 0.06);
+  heroCamera.position.y = 1.2 - Math.min(0.3, elapsed * 0.01);
+  heroCamera.lookAt(0, 0.5, 0);
+
+  // Particle field — perfectly still for ENR contrast
+
+  // Floor grid time
+  floor.material.uniforms.uTime.value = elapsed;
+
+  heroRenderer.render(heroScene, heroCamera);
+
+  // ── EXPERIENCE VIDEO PANELS ──
+  if (xpCanvases[0] && document.getElementById('xp-canvas-0')) {
+    const c0 = document.getElementById('xp-canvas-0');
+    drawXPVideo0(c0, elapsed);
+    const c1 = document.getElementById('xp-canvas-1');
+    drawXPVideo1(c1, elapsed);
+    const c2 = document.getElementById('xp-canvas-2');
+    drawXPVideo2(c2, elapsed);
+  }
+
+  // ── PROJECTS VIDEO PANELS ──
+  if (projCanvases[0] && document.getElementById('proj-canvas-0')) {
+    const pc0 = document.getElementById('proj-canvas-0');
+    drawProjCanvas0(pc0, elapsed);
+    const pc1 = document.getElementById('proj-canvas-1');
+    drawProjCanvas1(pc1, elapsed);
+    const pc2 = document.getElementById('proj-canvas-2');
+    drawProjCanvas2(pc2, elapsed);
+  }
+
+  // ── MISSION CONTROL ──
+  const mc = document.getElementById('mission-canvas');
+  if (mc) drawMissionCanvas(mc, elapsed);
+}
+
+// ──────────────────────── RESIZE HANDLER ────────────────────────
+function onResize() {
+  heroRenderer.setSize(window.innerWidth, window.innerHeight);
+  heroCamera.aspect = window.innerWidth / window.innerHeight;
+  heroCamera.updateProjectionMatrix();
+  initCanvases();
+}
+
+window.addEventListener('resize', onResize);
+
+// ──────────────────────── DATA STREAM LINES ────────────────────────
+function createDataStreams() {
+  const container = document.getElementById('dataStreams');
+  for (let i = 0; i < 20; i++) {
+    const div = document.createElement('div');
+    div.className = 'stream-column';
+    div.style.left = `${Math.random() * 100}%`;
+    div.style.height = `${30 + Math.random() * 50}px`;
+    div.style.animationDuration = `${3 + Math.random() * 6}s`;
+    div.style.animationDelay = `${Math.random() * 5}s`;
+    div.style.opacity = Math.random() * 0.5 + 0.2;
+    container.appendChild(div);
+  }
+}
+
+// ──────────────────────── SKILLS GRID ────────────────────────
+function populateSkills() {
+  const skills = [
+    'Java', 'Python', 'C++', 'Swift', 'C#', 'SQL', 'React',
+    'TypeScript', 'JavaScript', 'HTML', 'CSS', 'Git', 'VS Code',
+    'PostgreSQL', 'Docker', 'FastAPI', 'Streamlit', 'OpenAI',
+    'LightGBM', 'Gemini', 'Agile', 'AWS', 'Excel', 'CI/CD'
+  ];
+  const grid = document.getElementById('skillsGrid');
+  skills.forEach(s => {
+    const tag = document.createElement('div');
+    tag.className = 'skill-tag';
+    tag.textContent = s;
+    grid.appendChild(tag);
+  });
+}
+
+// ──────────────────────── STAT COUNTER ANIMATION ────────────────────────
+function animateStats() {
+  document.querySelectorAll('.stat-value').forEach(el => {
+    const target = parseFloat(el.dataset.target);
+    const suffix = el.dataset.suffix || '';
+    const prefix = el.dataset.prefix || '';
+    let current = 0;
+    const duration = 2000;
+    const start = performance.now();
+    function update(now) {
+      const progress = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      current = target * eased;
+      if (target >= 100) {
+        el.textContent = prefix + Math.floor(current) + suffix;
+      } else {
+        el.textContent = prefix + current.toFixed(2) + suffix;
+      }
+      if (progress < 1) requestAnimationFrame(update);
+      else el.textContent = prefix + target + suffix;
+    }
+    requestAnimationFrame(update);
+  });
+}
+
+// ──────────────────────── BOOT ────────────────────────
+createDataStreams();
+populateSkills();
+
+// Delay canvas init to ensure layout is complete
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    initCanvases();
+    animate();
+  });
+});
+
+// Observe stats section for counter animation
+const statsObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      animateStats();
+      statsObserver.disconnect();
+    }
+  });
+}, { threshold: 0.3 });
+setTimeout(() => {
+  const statsBar = document.querySelector('.stats-bar');
+  if (statsBar) statsObserver.observe(statsBar);
+}, 500);
+</script>
+</body>
+</html>
