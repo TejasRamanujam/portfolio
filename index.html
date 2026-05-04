@@ -264,7 +264,7 @@
     padding:0.6rem 0.75rem; border:1px solid rgba(176,190,197,0.2);
     font-size:0.75rem; letter-spacing:0.06em;
     color:var(--station); text-align:center;
-    transition: all 0.3s; cursor:default;
+    transition: all 0.3s; cursor:pointer;
   }
   .skill-tag:hover { border-color:var(--orbital); color:var(--starlight); text-shadow:0 0 10px var(--orbital-glow); }
   .contact-item {
@@ -283,6 +283,36 @@
     transition: color 0.3s, text-shadow 0.3s;
   }
   .contact-link:hover { color:var(--starlight); text-shadow:0 0 15px var(--orbital-glow); }
+  .skill-tag.active { border-color:var(--orbital); color:var(--starlight); background:rgba(21,101,192,0.12); }
+
+  /* ── PROJECT OVERLAY ── */
+  .project-overlay {
+    display:flex; flex-direction:column; gap:0.75rem;
+  }
+  .project-overlay-header {
+    font-family:'Orbitron',sans-serif; font-size:0.8rem; letter-spacing:0.2em;
+    color:var(--orbital); margin-bottom:0.75rem;
+    border-bottom:1px solid rgba(21,101,192,0.15); padding-bottom:0.75rem;
+  }
+  .project-overlay-card {
+    background:rgba(0,0,0,0.4); border:1px solid rgba(21,101,192,0.15);
+    border-radius:2px; padding:1rem 1.25rem;
+    animation: overlaySlideIn 0.35s cubic-bezier(0.16,1,0.3,1);
+  }
+  @keyframes overlaySlideIn {
+    0% { opacity:0; transform:translateY(-8px); filter:blur(4px); }
+    100% { opacity:1; transform:translateY(0); filter:blur(0); }
+  }
+  .project-overlay-card h4 {
+    font-family:'Orbitron',sans-serif; font-size:0.75rem; letter-spacing:0.12em;
+    color:var(--starlight); margin-bottom:0.35rem;
+  }
+  .project-overlay-card .overlay-skills {
+    font-size:0.6rem; letter-spacing:0.1em; color:var(--orbital); margin-bottom:0.5rem;
+  }
+  .project-overlay-card .overlay-blurb {
+    font-size:0.75rem; line-height:1.6; color:var(--station);
+  }
 
   /* ── PARTICLES / AMBIENT ── */
   .particle-bg { position:absolute; inset:0; pointer-events:none; z-index:0; opacity:0.25; }
@@ -485,22 +515,25 @@
       <div class="skills-grid" id="skillsGrid"></div>
     </div>
     <div class="contact-panel">
-      <h3>&#x25B6; CONTACT COORDINATES</h3>
-      <div class="contact-item">
-        <div><div class="contact-label">PHONE</div><div class="contact-value">612-978-0228</div></div>
+      <div id="contactContent">
+        <h3>&#x25B6; CONTACT COORDINATES</h3>
+        <div class="contact-item">
+          <div><div class="contact-label">PHONE</div><div class="contact-value">612-978-0228</div></div>
+        </div>
+        <div class="contact-item">
+          <div><div class="contact-label">EMAIL</div><div class="contact-value">tejasrama143@gmail.com</div></div>
+        </div>
+        <div class="contact-item">
+          <div><div class="contact-label">LINKEDIN</div><a class="contact-link" href="https://linkedin.com/in/tejas-ramanujam" target="_blank" rel="noopener">linkedin.com/in/tejas-ramanujam</a></div>
+        </div>
+        <div class="contact-item">
+          <div><div class="contact-label">GITHUB</div><a class="contact-link" href="https://github.com/TejasRamanujam" target="_blank" rel="noopener">github.com/TejasRamanujam</a></div>
+        </div>
+        <div class="contact-item">
+          <div><div class="contact-label">LOCATION</div><div class="contact-value">Dallas - Fort Worth Metroplex</div></div>
+        </div>
       </div>
-      <div class="contact-item">
-        <div><div class="contact-label">EMAIL</div><div class="contact-value">tejasrama143@gmail.com</div></div>
-      </div>
-      <div class="contact-item">
-        <div><div class="contact-label">LINKEDIN</div><a class="contact-link" href="https://linkedin.com/in/tejas-ramanujam" target="_blank" rel="noopener">linkedin.com/in/tejas-ramanujam</a></div>
-      </div>
-      <div class="contact-item">
-        <div><div class="contact-label">GITHUB</div><a class="contact-link" href="https://github.com/TejasRamanujam" target="_blank" rel="noopener">github.com/TejasRamanujam</a></div>
-      </div>
-      <div class="contact-item">
-        <div><div class="contact-label">LOCATION</div><div class="contact-value">Dallas - Fort Worth Metroplex</div></div>
-      </div>
+      <div id="projectOverlay" class="project-overlay" style="display:none"></div>
     </div>
   </div>
 </section>
@@ -1297,19 +1330,148 @@ function createDataStreams() {
   }
 }
 
-// ──────────────────────── SKILLS GRID ────────────────────────
+// ──────────────────────── SKILL GRID + PROJECT OVERLAY ────────────────────────
+const projectData = {
+  'Prophecy ML/AI Risk Assessor': {
+    tech: 'FastAPI / React / TypeScript / LightGBM',
+    skills: ['Python', 'React', 'TypeScript', 'PostgreSQL', 'LightGBM', 'FastAPI', 'Streamlit'],
+    blurbs: {
+      Python: 'Built the ML backend and prediction pipeline with LightGBM, achieving 95% accuracy on loan default risk for underbanked populations',
+      React: 'Developed the frontend dashboard for visualizing risk assessment outputs and financial predictions in real time',
+      TypeScript: 'Typed the entire React frontend for safe API interactions and reliable state management across prediction modules',
+      PostgreSQL: 'Designed the database schema for secure storage of financial profiles and prediction results',
+      LightGBM: 'Implemented gradient-boosted trees on Kaggle\'s Home Credit dataset, tuning hyperparameters for optimal default risk prediction',
+      FastAPI: 'Architected REST endpoints for model inference and data ingestion with async PostgreSQL connectivity',
+      Streamlit: 'Built an interactive prototype dashboard for rapid ML model demonstration and stakeholder review',
+    },
+  },
+  ID8: {
+    tech: 'LangChain / Pydantic / NVIDIA Nemotron / ChromaDB / HuggingFace / PostgreSQL / React / TailwindCSS / FastAPI',
+    skills: ['LangChain', 'Pydantic', 'ChromaDB', 'HuggingFace', 'PostgreSQL', 'React', 'TailwindCSS', 'FastAPI', 'Gemini', 'OpenAI'],
+    blurbs: {
+      LangChain: 'Orchestrated the RAG pipeline to parse documents and generate structured Jira Initiatives, Epics, and Stories',
+      Pydantic: 'Validated and structured all AI-generated output schemas before pushing to the Jira API',
+      ChromaDB: 'Used as the vector store for semantic retrieval of project context and document embeddings',
+      HuggingFace: 'Leveraged HuggingFace embeddings for document chunk representation in the RAG pipeline',
+      PostgreSQL: 'Persisted generated issues and project metadata for audit trail and cross-session continuity',
+      React: 'Built the single-page UI with a one-click generation flow and live preview of Jira output',
+      TailwindCSS: 'Styled the frontend with utility-first CSS for rapid prototyping and consistent design system',
+      FastAPI: 'Served the AI generation endpoints with async support and Jira API integration middleware',
+      Gemini: 'Used Gemini as an alternative LLM backend for issue generation during experimentation',
+      OpenAI: 'Evaluated OpenAI models for generation quality comparison against Nemotron outputs',
+    },
+  },
+  "Fool's Gold": {
+    tech: 'C# / Visual Studio / GitHub',
+    skills: ['C#', 'Git', 'VS Code'],
+    blurbs: {
+      'C#': 'Developed a 2D side-scroller game with physics, sprite rendering, and input handling in Visual Studio',
+      'Git': 'Managed source control with feature branching and collaborated via pull requests throughout development',
+      'VS Code': 'Used as the primary code editor for game logic iteration and debugging',
+    },
+  },
+  SentimentAnalysis: {
+    tech: 'Python',
+    skills: ['Python'],
+    blurbs: {
+      Python: 'Implemented FFNN and RNN models in PyTorch for text sentiment classification on validation datasets',
+    },
+  },
+  NexRev: {
+    tech: 'Java / Swift / HTML / CSS / Excel',
+    skills: ['Java', 'Swift', 'HTML', 'CSS', 'Excel'],
+    blurbs: {
+      Java: 'Used for internal tooling during 600+ drive OS migration, automating disk formatting and validation',
+      Swift: 'Developed macOS utilities for drive inventory scanning and system health checks',
+      HTML: 'Built internal dashboard pages for tracking inventory and migration status across systems',
+      CSS: 'Styled internal monitoring interfaces with a clean, functional design for operations staff',
+      Excel: 'Created macros and pivot tables to catalog 100+ items and streamline inventory management tracking',
+    },
+  },
+  Bytepoint: {
+    tech: 'AWS / C++ / Docker / SQL / JavaScript',
+    skills: ['AWS', 'C++', 'Docker', 'SQL', 'JavaScript', 'Agile', 'CI/CD'],
+    blurbs: {
+      AWS: 'Researched cloud development topics and built 4+ intro-level labs for Python and JavaScript on AWS infrastructure',
+      'C++': 'Contributed to performance-critical cloud research simulations and data processing utilities',
+      Docker: 'Containerized lab environments for consistent student experience across local and cloud deployments',
+      SQL: 'Queried and analyzed cloud resource usage data to optimize lab provisioning cost efficiency',
+      JavaScript: 'Developed interactive browser-based lab exercises for introductory programming courses',
+      Agile: 'Applied sprint-based development in a cross-functional research team, iterating on lab content weekly',
+      'CI/CD': 'Set up automated lab deployment pipelines to keep course materials updated across semesters',
+    },
+  },
+};
+
+const skillToProjects = {};
+const allProjectKeys = Object.keys(projectData);
+allProjectKeys.forEach(pk => {
+  projectData[pk].skills.forEach(s => {
+    if (!skillToProjects[s]) skillToProjects[s] = [];
+    skillToProjects[s].push(pk);
+  });
+});
+
+const selectedSkills = new Set();
+
+function renderProjectOverlay() {
+  const overlay = document.getElementById('projectOverlay');
+  const contact = document.getElementById('contactContent');
+  if (!overlay || !contact) return;
+
+  if (selectedSkills.size === 0) {
+    overlay.style.display = 'none';
+    contact.style.display = 'block';
+    return;
+  }
+
+  contact.style.display = 'none';
+  overlay.style.display = 'flex';
+
+  const shownProjects = new Set();
+  selectedSkills.forEach(skill => {
+    const projects = skillToProjects[skill] || [];
+    projects.forEach(p => shownProjects.add(p));
+  });
+
+  let html = '<div class="project-overlay-header">&#x25B6; PROJECT ASSOCIATIONS</div>';
+  shownProjects.forEach(pk => {
+    const proj = projectData[pk];
+    const relevantSkills = [...selectedSkills].filter(s => proj.skills.includes(s));
+    const blurbParts = relevantSkills.map(s => proj.blurbs[s]).filter(Boolean);
+    if (blurbParts.length === 0) return;
+    html += `<div class="project-overlay-card">
+      <h4>${pk}</h4>
+      <div class="overlay-skills">${relevantSkills.join(' / ')}</div>
+      <div class="overlay-blurb">${blurbParts.join('<br><br>')}</div>
+    </div>`;
+  });
+  overlay.innerHTML = html;
+}
+
 function populateSkills() {
-  const skills = [
+  const skillsList = [
     'Java', 'Python', 'C++', 'Swift', 'C#', 'SQL', 'React',
     'TypeScript', 'JavaScript', 'HTML', 'CSS', 'Git', 'VS Code',
     'PostgreSQL', 'Docker', 'FastAPI', 'Streamlit', 'OpenAI',
-    'LightGBM', 'Gemini', 'Agile', 'AWS', 'Excel', 'CI/CD'
+    'LightGBM', 'Gemini', 'Agile', 'AWS', 'Excel', 'CI/CD',
+    'LangChain', 'Pydantic', 'ChromaDB', 'HuggingFace', 'TailwindCSS',
   ];
   const grid = document.getElementById('skillsGrid');
-  skills.forEach(s => {
+  skillsList.forEach(s => {
     const tag = document.createElement('div');
     tag.className = 'skill-tag';
     tag.textContent = s;
+    tag.addEventListener('click', () => {
+      if (selectedSkills.has(s)) {
+        selectedSkills.delete(s);
+        tag.classList.remove('active');
+      } else {
+        selectedSkills.add(s);
+        tag.classList.add('active');
+      }
+      renderProjectOverlay();
+    });
     grid.appendChild(tag);
   });
 }
