@@ -229,8 +229,8 @@
   }
   .train-card > * { position:relative; z-index:1; }
   .train-card h3 { color:var(--starlight); margin-bottom:0.25rem; }
-  .train-card .org { color:var(--orbital); font-size:0.85rem; font-weight:500; margin-bottom:0.25rem; }
-  .train-card .date { color:var(--station); font-size:0.7rem; letter-spacing:0.08em; margin-bottom:1rem; }
+  .train-card .org { color:var(--orbital); font-size:0.8rem; font-weight:500; margin-bottom:0.75rem; display:block; }
+  .train-card .date { color:var(--station); font-size:0.7rem; letter-spacing:0.08em; margin-bottom:0.5rem; display:block; }
   .train-card p { font-size:0.8rem; color:var(--station); line-height:1.7; }
   .perspective-metric {
     font-family:'Orbitron',sans-serif; font-size:2.5rem; font-weight:700;
@@ -378,7 +378,7 @@
     <div class="xp-card">
       <div class="xp-video-wrap"><canvas id="xp-canvas-0"></canvas></div>
       <div class="xp-card-body">
-        <span class="date">June 2024 &mdash; August 2024</span>
+        <span class="date">June 2024 - August 2024</span>
         <span class="role">Software Intern</span>
         <h3>NexRev LLC</h3>
         <ul>
@@ -392,7 +392,7 @@
     <div class="xp-card">
       <div class="xp-video-wrap"><canvas id="xp-canvas-1"></canvas></div>
       <div class="xp-card-body">
-        <span class="date">Oct 2022 &mdash; Jan 2023</span>
+        <span class="date">Oct 2022 - Jan 2023</span>
         <span class="role">Software Assistant</span>
         <h3>Synergy Sparq</h3>
         <ul>
@@ -406,7 +406,7 @@
     <div class="xp-card">
       <div class="xp-video-wrap"><canvas id="xp-canvas-2"></canvas></div>
       <div class="xp-card-body">
-        <span class="date">May 2021 &mdash; June 2023</span>
+        <span class="date">May 2021 - June 2023</span>
         <span class="role">Cloud Researcher</span>
         <h3>Bytepoint Consulting</h3>
         <ul>
@@ -447,7 +447,7 @@
       <div class="proj-card-body">
         <span class="tech">FastAPI / React / TypeScript / LightGBM</span>
         <h3>Prophecy ML/AI Risk Assessor</h3>
-        <p>Python ML Financial Assessor with PostgreSQL — LightGBM model leveraging Kaggle's Home Credit Default Risk dataset. Secured scalable AI financial prediction for underbanked populations.</p>
+        <p>Python ML Financial Assessor with PostgreSQL - LightGBM model leveraging Kaggle's Home Credit Default Risk dataset. Secured scalable AI financial prediction for underbanked populations.</p>
       </div>
     </div>
     <!-- ID8 -->
@@ -458,7 +458,7 @@
       <div class="proj-card-body">
         <span class="tech">LangChain / Pydantic / NVIDIA Nemotron / ChromaDB / HuggingFace / PostgreSQL / React / TailwindCSS / FastAPI</span>
         <h3>ID8</h3>
-        <p>Generate Initiatives, Epics, and Stories with a click of a button, directly into your Jira space. AI-powered Jira automation using RAG with ChromaDB and NVIDIA Nemotron, served via FastAPI and a React/TailwindCSS frontend.</p>
+        <p>AI-powered Jira automation using RAG with ChromaDB and NVIDIA Nemotron, served via FastAPI and a React/TailwindCSS frontend.</p>
       </div>
     </div>
     <!-- Fool's Gold -->
@@ -481,24 +481,24 @@
   <span class="section-number">03</span>
   <div class="train-grid">
     <div class="train-card">
-      <span class="date">May 2024 &mdash; Present</span>
+      <span class="date">May 2024 - Present</span>
       <span class="org">University of Texas at Dallas</span>
       <h3>The Design Society</h3>
-      <p>Founder, Events and Logistics Director — Directed event planning to coordinate 10+ workshops, driving a 30% increase in membership.</p>
+      <p>Founder, Events and Logistics Director - Directed event planning to coordinate 10+ workshops, driving a 30% increase in membership.</p>
       <div class="perspective-metric">10<span class="unit">+ Workshops</span></div>
     </div>
     <div class="train-card">
-      <span class="date">March 2024 &mdash; Present</span>
+      <span class="date">March 2024 - Present</span>
       <span class="org">University of Texas at Dallas</span>
       <h3>Nebula Labs</h3>
-      <p>Treasurer — Managed a $3,000 annual budget, securing additional funding for a 25% increase in available funds.</p>
+      <p>Treasurer - Managed a $3,000 annual budget, securing additional funding for a 25% increase in available funds.</p>
       <div class="perspective-metric">$3K<span class="unit">Budget</span></div>
     </div>
     <div class="train-card">
-      <span class="date">Aug 2021 &mdash; Present</span>
+      <span class="date">Aug 2021 - Present</span>
       <span class="org">University of Texas at Dallas</span>
       <h3>DECA</h3>
-      <p>Vice President of Marketing — Spearheaded marketing initiatives driving a 20% increase in event participation.</p>
+      <p>Vice President of Marketing - Spearheaded marketing initiatives driving a 20% increase in event participation.</p>
       <div class="perspective-metric">20%<span class="unit">Participation Increase</span></div>
     </div>
   </div>
@@ -961,116 +961,139 @@ function drawProjCanvas1(canvas, time) {
   ctx.fillStyle = '#000408';
   ctx.fillRect(0, 0, w, h);
 
-  // ID8 — AI-powered Jira automation. RAG pipeline visual: documents -> ChromaDB -> LLM -> Jira
-  const cx = w / 2, cy = h / 2;
+  // ID8: Kinetic data pipeline — source documents -> AI engine -> Jira output
+  // Animated particle streams, morphing core, and progressive ticket generation
 
-  // Central brain node — the LLM core
-  const pulse = Math.sin(time * 0.8) * 0.2 + 0.8;
-  const rad = 20 + pulse * 10;
-  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad);
-  grad.addColorStop(0, 'rgba(21,101,192,0.4)');
-  grad.addColorStop(0.5, 'rgba(21,101,192,0.15)');
-  grad.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = grad;
-  ctx.beginPath();
-  ctx.arc(cx, cy, rad + 20, 0, Math.PI * 2);
-  ctx.fill();
+  // ── Background data matrix rain (input side) ──
+  for (let i = 0; i < 30; i++) {
+    const cx = ((time * 60 + i * 137) % (w * 0.35));
+    const cy = ((time * 50 + i * 97) % (h * 1.6)) - h * 0.3;
+    ctx.fillStyle = `rgba(21,101,192,${0.02 + Math.sin(time + i) * 0.01 + 0.02})`;
+    ctx.font = '6px "Courier New", monospace';
+    ctx.fillText(String.fromCharCode(0x30A0 + (Math.floor(time * 2 + i) % 96)), cx, cy);
+  }
 
-  ctx.fillStyle = 'rgba(21,101,192,0.8)';
-  ctx.beginPath();
-  ctx.arc(cx, cy, 8, 0, Math.PI * 2);
-  ctx.fill();
+  // ── Moving particle stream: document chunks flowing left-to-right ──
+  for (let p = 0; p < 50; p++) {
+    const t = ((time * 0.15 + p / 50) % 1);
+    const px = t * w;
+    const py = h * 0.25 + Math.sin(t * Math.PI * 6 + p) * 12 + p % 4 * 18;
+    const alpha = Math.sin(t * Math.PI) * 0.5;
+    const size = 1 + Math.sin(t * Math.PI) * 2;
 
-  ctx.fillStyle = '#F5F5F5';
-  ctx.font = '9px "Orbitron", sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('NVIDIA Nemotron', cx, cy - 20);
-
-  // RAG pipeline stages in an arc
-  const stages = ['Source', 'ChromaDB', 'LangChain', 'Pydantic', 'Jira'];
-  const stageColors = ['#B0BEC5', '#1565C0', '#FF0000', '#F5F5F5', '#1565C0'];
-  const arcRadius = 70;
-  stages.forEach((s, i) => {
-    const angle = -Math.PI * 0.6 + (i / (stages.length - 1)) * Math.PI * 1.2;
-    const sx = cx + Math.cos(angle) * arcRadius;
-    const sy = cy + Math.sin(angle) * arcRadius;
-
-    // Connecting line from center to stage
-    ctx.strokeStyle = `rgba(21,101,192,${0.08 + Math.sin(time + i) * 0.04 + 0.04})`;
-    ctx.lineWidth = 0.5;
-    ctx.setLineDash([3, 6]);
+    if (t > 0.3 && t < 0.7) {
+      ctx.fillStyle = `rgba(255,0,0,${alpha})`;
+    } else if (t > 0.7) {
+      ctx.fillStyle = `rgba(21,101,192,${alpha})`;
+    } else {
+      ctx.fillStyle = `rgba(176,190,197,${alpha * 0.5})`;
+    }
     ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(sx, sy);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Stage node
-    const nodePulse = Math.sin(time * 1.2 + i * 0.9) * 0.3 + 0.7;
-    ctx.fillStyle = stageColors[i];
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = stageColors[i];
-    ctx.beginPath();
-    ctx.arc(sx, sy, 4 + nodePulse * 3, 0, Math.PI * 2);
+    ctx.arc(px, py, size, 0, Math.PI * 2);
     ctx.fill();
-    ctx.shadowBlur = 0;
+  }
 
-    // Label
-    ctx.fillStyle = 'rgba(245,245,245,0.6)';
-    ctx.font = '7px "Inter", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(s, sx, sy + 18);
-  });
+  // ── AI engine: rotating gear-like core ──
+  const coreX = w * 0.45, coreY = h * 0.45;
+  const coreSize = 30 + Math.sin(time * 0.6) * 5;
 
-  // Scrolling code generation effect
+  // Outer glow
+  const coreGrad = ctx.createRadialGradient(coreX, coreY, 0, coreX, coreY, coreSize * 2);
+  coreGrad.addColorStop(0, 'rgba(21,101,192,0.25)');
+  coreGrad.addColorStop(0.3, 'rgba(21,101,192,0.08)');
+  coreGrad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = coreGrad;
+  ctx.beginPath();
+  ctx.arc(coreX, coreY, coreSize * 2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Rotating gear teeth
+  const teeth = 8;
+  for (let i = 0; i < teeth; i++) {
+    const angle = (i / teeth) * Math.PI * 2 + time * 0.5 + Math.sin(time * 0.3) * 0.2;
+    const innerR = 18, outerR = coreSize;
+    const tx = coreX + Math.cos(angle) * (innerR + (outerR - innerR) * 0.5);
+    const ty = coreY + Math.sin(angle) * (innerR + (outerR - innerR) * 0.5);
+    ctx.fillStyle = `rgba(21,101,192,${0.4 + Math.sin(time + i) * 0.15 + 0.15})`;
+    ctx.beginPath();
+    ctx.arc(tx, ty, 5 + Math.sin(time * 0.8 + i) * 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Core center
+  ctx.fillStyle = 'rgba(21,101,192,0.6)';
+  ctx.beginPath();
+  ctx.arc(coreX, coreY, 10, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(245,245,245,0.2)';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.arc(coreX, coreY, coreSize, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // ── Streaming output: progressive Jira ticket generation ──
   ctx.textAlign = 'left';
-  const codeLines = [
-    '{ "initiative": "Sprint 24" }',
-    '  "epic": "Auth Overhaul",',
-    '  "stories": [',
-    '    "OAuth login flow",',
-    '    "Token refresh impl",',
-    '    "MFA setup page"',
-    '  ]',
-    '}',
+  const outputLines = [
+    '[ID8] Generating Initiative...',
+    '  Epic: Cloud Infrastructure',
+    '  Story: Deploy monitoring',
+    '  Story: Set up alerts',
+    '  Story: Configure dashboards',
+    '[ID8] Pushing to Jira...',
+    '  ✓ Created ID8-101',
+    '  ✓ Created ID8-102',
   ];
-  const startY = ((time * 25) % (codeLines.length * 24)) - codeLines.length * 24;
-  ctx.font = '9px "Courier New", monospace';
-  codeLines.forEach((line, i) => {
-    const ly = startY + i * 20;
+
+  const scrollOffset = ((time * 20) % (outputLines.length * 22));
+  ctx.font = '8px "Courier New", monospace';
+  outputLines.forEach((line, i) => {
+    const ly = h * 0.1 + i * 22 - scrollOffset;
     if (ly > -10 && ly < h + 10) {
-      ctx.fillStyle = line.includes('initiative') || line.includes('epic') || line.includes('stories')
-        ? 'rgba(21,101,192,0.5)'
-        : 'rgba(176,190,197,0.3)';
-      ctx.fillText(line, w * 0.6, ly);
+      if (line.startsWith('[ID8]')) {
+        ctx.fillStyle = 'rgba(21,101,192,0.6)';
+      } else if (line.startsWith('  ✓')) {
+        ctx.fillStyle = 'rgba(0,200,100,0.5)';
+      } else {
+        ctx.fillStyle = 'rgba(176,190,197,0.35)';
+      }
+      ctx.fillText(line, w * 0.55, ly);
     }
   });
 
-  // Arrow pointing right — "into Jira"
-  const arrowX = w * 0.85;
-  const arrowY = h * 0.35;
-  ctx.strokeStyle = 'rgba(21,101,192,0.3)';
+  // ── Progress bar / pipeline indicator ──
+  const progress = (time * 0.03) % 1;
+  const barY = h * 0.82;
+  ctx.strokeStyle = 'rgba(21,101,192,0.15)';
   ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(arrowX, arrowY);
-  ctx.lineTo(arrowX + 20, arrowY);
-  ctx.lineTo(arrowX + 12, arrowY - 6);
-  ctx.moveTo(arrowX + 20, arrowY);
-  ctx.lineTo(arrowX + 12, arrowY + 6);
-  ctx.stroke();
-
-  ctx.fillStyle = 'rgba(21,101,192,0.4)';
-  ctx.font = '6px "Orbitron", sans-serif';
+  ctx.strokeRect(w * 0.05, barY, w * 0.9, 4);
+  const gradBar = ctx.createLinearGradient(w * 0.05, 0, w * 0.95, 0);
+  gradBar.addColorStop(0, 'rgba(21,101,192,0.1)');
+  gradBar.addColorStop(0.5, 'rgba(21,101,192,0.6)');
+  gradBar.addColorStop(1, 'rgba(255,0,0,0.3)');
+  ctx.fillStyle = gradBar;
+  ctx.fillRect(w * 0.05, barY, w * 0.9 * progress, 4);
+  ctx.fillStyle = 'rgba(245,245,245,0.2)';
+  ctx.font = '6px "Inter", sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('JIRA', arrowX + 10, arrowY + 20);
+  ctx.fillText(Math.floor(progress * 100) + '%', w * 0.5, barY + 18);
 
-  // Floating keywords as particle orbits
-  const keywords = ['LangChain', 'Pydantic', 'ChromaDB', 'HuggingFace', 'React', 'TailwindCSS', 'FastAPI', 'PostgreSQL'];
+  // ── Pipeline stage labels ──
+  const stages = ['INGEST', 'EMBED', 'GENERATE', 'OUTPUT'];
+  stages.forEach((s, i) => {
+    const sx = w * 0.05 + (i / 3) * w * 0.9;
+    ctx.fillStyle = (i / 3) <= progress ? 'rgba(21,101,192,0.5)' : 'rgba(176,190,197,0.15)';
+    ctx.font = '7px "Orbitron", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(s, sx, barY - 10);
+  });
+
+  // ── Pulsing keyword constellation (bottom area) ──
+  const keywords = ['LangChain', 'Pydantic', 'ChromaDB', 'HuggingFace', 'React', 'TailwindCSS', 'FastAPI', 'PostgreSQL', 'Nemotron'];
   keywords.forEach((kw, i) => {
-    const angle = time * (0.08 + i * 0.005) + i * 0.8;
-    const kx = cx + Math.cos(angle) * (50 + i * 5);
-    const ky = cy + Math.sin(angle) * (50 + i * 5);
-    ctx.fillStyle = `rgba(176,190,197,${0.05 + Math.sin(time + i) * 0.03 + 0.05})`;
+    const angle = time * (0.1 + i * 0.02) + i * 0.7;
+    const kx = w * 0.45 + Math.cos(angle) * (50 + i * 3);
+    const ky = h * 0.45 + Math.sin(angle) * (40 + i * 3);
+    ctx.fillStyle = `rgba(176,190,197,${0.04 + Math.sin(time * 0.5 + i * 0.5) * 0.03 + 0.04})`;
     ctx.font = '6px "Inter", sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(kw, kx, ky);
@@ -1438,7 +1461,8 @@ function renderProjectOverlay() {
   shownProjects.forEach(pk => {
     const proj = projectData[pk];
     const relevantSkills = [...selectedSkills].filter(s => proj.skills.includes(s));
-    const blurbParts = relevantSkills.map(s => proj.blurbs[s]).filter(Boolean);
+    if (relevantSkills.length === 0) return;
+    const blurbParts = relevantSkills.map(s => `<strong>${s}:</strong> ${proj.blurbs[s]}`).filter(Boolean);
     if (blurbParts.length === 0) return;
     html += `<div class="project-overlay-card">
       <h4>${pk}</h4>
