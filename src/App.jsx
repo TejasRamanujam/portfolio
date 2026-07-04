@@ -1,0 +1,437 @@
+import { useEffect, useRef, useState } from 'react';
+import { EXPERIENCE, PROJECTS_FEATURED, PROJECTS_MORE, SKILLS } from './data.js';
+import { createPlotter } from './plotter.js';
+
+const LINKS = {
+  github: 'https://github.com/TejasRamanujam',
+  linkedin: 'https://linkedin.com/in/tejas-ramanujam',
+  email: 'tejasrama143@gmail.com',
+  demos: 'https://tejas-live-demos.vercel.app',
+};
+
+const prefersReduced = () =>
+  typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------------------------------------------------------------- clock */
+
+function Clock() {
+  const [now, setNow] = useState('--:--:--');
+  useEffect(() => {
+    const fmt = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Chicago',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    });
+    const tick = () => setNow(fmt.format(new Date()));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <span className="clock mono" aria-label={`Local time in Richardson, Texas: ${now}`}>
+      RICHARDSON, TX&nbsp;&nbsp;{now} CT
+    </span>
+  );
+}
+
+/* ------------------------------------------------------- kinetic title */
+
+function KineticLine({ text }) {
+  return (
+    <span className="k-line" aria-hidden="true">
+      {text.split('').map((ch, i) => (
+        <span className="k-ch" key={i}>
+          {ch}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+function useKineticTitle(heroRef, enabled) {
+  useEffect(() => {
+    if (!enabled) return;
+    const hero = heroRef.current;
+    if (!hero) return;
+    const chars = Array.from(hero.querySelectorAll('.k-ch'));
+    if (!chars.length) return;
+
+    const state = chars.map(() => ({ w: 72, g: 640 }));
+    let px = -9999;
+    let raf = 0;
+    let active = false;
+    let visible = true;
+
+    const onMove = (e) => {
+      px = e.clientX;
+      active = true;
+    };
+
+    const loop = () => {
+      if (visible) {
+        for (let i = 0; i < chars.length; i++) {
+          const r = chars[i].getBoundingClientRect();
+          const cx = r.left + r.width / 2;
+          const d = Math.abs(px - cx);
+          const f = active ? Math.max(0, 1 - d / 260) : 0;
+          const s = state[i];
+          s.w += (72 + f * 53 - s.w) * 0.14;
+          s.g += (640 + f * 230 - s.g) * 0.14;
+          chars[i].style.fontVariationSettings = `'wdth' ${s.w.toFixed(1)}, 'wght' ${s.g.toFixed(0)}`;
+        }
+      }
+      raf = requestAnimationFrame(loop);
+    };
+
+    const io = new IntersectionObserver(([en]) => {
+      visible = en.isIntersecting;
+    });
+    io.observe(hero);
+    window.addEventListener('pointermove', onMove, { passive: true });
+    raf = requestAnimationFrame(loop);
+    return () => {
+      cancelAnimationFrame(raf);
+      io.disconnect();
+      window.removeEventListener('pointermove', onMove);
+    };
+  }, [enabled, heroRef]);
+}
+
+/* ---------------------------------------------------------- crosshair */
+
+function Crosshair({ enabled }) {
+  const hRef = useRef(null);
+  const vRef = useRef(null);
+  const tagRef = useRef(null);
+  useEffect(() => {
+    if (!enabled) return;
+    let tx = -100;
+    let ty = -100;
+    let x = -100;
+    let y = -100;
+    let seen = false;
+    let raf = 0;
+    const onMove = (e) => {
+      tx = e.clientX;
+      ty = e.clientY;
+      seen = true;
+    };
+    const loop = () => {
+      x += (tx - x) * 0.22;
+      y += (ty - y) * 0.22;
+      if (seen && hRef.current) {
+        hRef.current.style.transform = `translateY(${y}px)`;
+        vRef.current.style.transform = `translateX(${x}px)`;
+        tagRef.current.style.transform = `translate(${x + 14}px, ${y + 14}px)`;
+        tagRef.current.textContent = `X ${String(Math.round(x)).padStart(4, '0')} · Y ${String(
+          Math.round(y),
+        ).padStart(4, '0')}`;
+        hRef.current.parentElement.style.opacity = '1';
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    window.addEventListener('pointermove', onMove, { passive: true });
+    raf = requestAnimationFrame(loop);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('pointermove', onMove);
+    };
+  }, [enabled]);
+  if (!enabled) return null;
+  return (
+    <div className="xhair" aria-hidden="true">
+      <div className="xhair-h" ref={hRef} />
+      <div className="xhair-v" ref={vRef} />
+      <div className="xhair-tag mono" ref={tagRef} />
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------ sections */
+
+function SectionHead({ no, title, note }) {
+  return (
+    <header className="sec-head" data-reveal>
+      <span className="sec-no mono">§ {no}</span>
+      <h2 className="sec-title">{title}</h2>
+      <span className="sec-note mono">{note}</span>
+    </header>
+  );
+}
+
+function WorkRow({ p, i, onInk }) {
+  return (
+    <li className="work-row" data-reveal style={{ '--i': i }}>
+      <a
+        className="work-link"
+        href={p.href}
+        target="_blank"
+        rel="noreferrer"
+        onPointerEnter={(e) => onInk(e.clientX, e.clientY)}
+      >
+        <div className="work-top">
+          <span className="work-idx mono">{String(i + 1).padStart(2, '0')}</span>
+          <h3 className="work-name">{p.label}</h3>
+          <span className="work-type mono">{p.type}</span>
+          <span className="work-period mono">{p.period}</span>
+          <span className="work-arrow" aria-hidden="true">
+            →
+          </span>
+        </div>
+        <div className="work-detail">
+          <div className="work-detail-inner">
+            <p className="work-desc">{p.desc}</p>
+            <p className="work-highlight mono">◆ {p.highlight}</p>
+            <ul className="tags mono">
+              {p.tech.map((t) => (
+                <li key={t}>{t}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </a>
+    </li>
+  );
+}
+
+/* ----------------------------------------------------------------- app */
+
+export default function App() {
+  const reduced = useRef(prefersReduced()).current;
+  const fine = useRef(
+    typeof matchMedia !== 'undefined' && matchMedia('(pointer: fine)').matches,
+  ).current;
+
+  const canvasRef = useRef(null);
+  const plotterRef = useRef(null);
+  const heroRef = useRef(null);
+
+  useKineticTitle(heroRef, !reduced && fine);
+
+  // Plotter background
+  useEffect(() => {
+    const plotter = createPlotter(canvasRef.current, { reducedMotion: reduced });
+    plotterRef.current = plotter;
+    return () => plotter.destroy();
+  }, [reduced]);
+
+  // Scroll reveals
+  useEffect(() => {
+    const els = Array.from(document.querySelectorAll('[data-reveal]'));
+    if (reduced || !('IntersectionObserver' in window)) {
+      els.forEach((el) => el.classList.add('in'));
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((en) => {
+          if (en.isIntersecting) {
+            en.target.classList.add('in');
+            io.unobserve(en.target);
+          }
+        });
+      },
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.05 },
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [reduced]);
+
+  // Easter egg: G toggles the drafting grid
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key.toLowerCase() === 'g' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        document.body.classList.toggle('show-grid');
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    // eslint-disable-next-line no-console
+    console.log('%cSHEET 01 — press G to toggle the drafting grid.', 'font-family:monospace');
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  const ink = (x, y) => plotterRef.current && plotterRef.current.burst(x, y);
+
+  return (
+    <>
+      <a className="skip mono" href="#main">
+        Skip to content
+      </a>
+      <canvas ref={canvasRef} className="plotter" aria-hidden="true" />
+      <div className="grid-overlay" aria-hidden="true" />
+      <Crosshair enabled={fine && !reduced} />
+
+      <header className="topbar">
+        <span className="mark mono">
+          T·RAMANUJAM<span className="mark-ext"> — SHEET 01</span>
+        </span>
+        <nav className="topnav mono" aria-label="Sections">
+          <a href="#work">WORK</a>
+          <a href="#experience">EXPERIENCE</a>
+          <a href="#skills">SKILLS</a>
+          <a href="#contact">CONTACT</a>
+        </nav>
+        <Clock />
+      </header>
+
+      <main id="main">
+        {/* ---------------------------------------------------- hero */}
+        <section className="hero" ref={heroRef} aria-label="Introduction">
+          <p className="kicker mono" data-reveal>
+            FIG. 01 — PORTFOLIO OF WORK · SOFTWARE ENGINEER
+          </p>
+          <h1 className="hero-title" data-reveal style={{ '--i': 1 }}>
+            <span className="visually-hidden">Tejas Ramanujam</span>
+            <KineticLine text="TEJAS" />
+            <KineticLine text="RAMANUJAM" />
+          </h1>
+          <div className="dim-line" data-reveal style={{ '--i': 2 }} aria-hidden="true">
+            <span className="dim-tick" />
+            <span className="dim-label mono">DRAWN 2026 · SCALE 1:1</span>
+            <span className="dim-tick" />
+          </div>
+          <div className="hero-grid" data-reveal style={{ '--i': 3 }}>
+            <p className="lede">
+              I build <em>AI systems</em>, full-stack products, and open-source tools — LLM
+              pipelines, FastAPI backends, React frontends.
+            </p>
+            <dl className="meta mono">
+              <div>
+                <dt>EDUCATION</dt>
+                <dd>B.S. SOFTWARE ENGINEERING — UT DALLAS &rsquo;26</dd>
+              </div>
+              <div>
+                <dt>GPA</dt>
+                <dd>3.87 / 4.00</dd>
+              </div>
+              <div>
+                <dt>BASED IN</dt>
+                <dd>RICHARDSON, TEXAS</dd>
+              </div>
+            </dl>
+          </div>
+          <div className="hero-cta" data-reveal style={{ '--i': 4 }}>
+            <a className="btn mono" href={LINKS.github} target="_blank" rel="noreferrer">
+              GITHUB ↗
+            </a>
+            <a className="btn mono" href={LINKS.linkedin} target="_blank" rel="noreferrer">
+              LINKEDIN ↗
+            </a>
+            <a className="btn btn-solid mono" href={`mailto:${LINKS.email}`}>
+              EMAIL ME
+            </a>
+          </div>
+        </section>
+
+        {/* -------------------------------------------------- ticker */}
+        <div className="ticker" aria-hidden="true">
+          <div className="ticker-track mono">
+            {[0, 1].map((k) => (
+              <span key={k}>
+                AI SYSTEMS — FULL-STACK PRODUCTS — OPEN-SOURCE TOOLS — LLM PIPELINES — FASTAPI
+                BACKENDS — REACT FRONTENDS — MULTI-AGENT ORCHESTRATION —&nbsp;
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* ---------------------------------------------------- work */}
+        <section id="work" className="section" aria-label="Selected work">
+          <SectionHead no="02" title="SELECTED WORK" note={`${PROJECTS_FEATURED.length} BUILDS`} />
+          <ol className="works">
+            {PROJECTS_FEATURED.map((p, i) => (
+              <WorkRow key={p.name} p={p} i={i} onInk={ink} />
+            ))}
+          </ol>
+        </section>
+
+        {/* ------------------------------------------------- archive */}
+        <section className="section" aria-label="Project archive">
+          <SectionHead no="03" title="ARCHIVE" note={`INDEX 07 — ${6 + PROJECTS_MORE.length}`} />
+          <ul className="arch">
+            {PROJECTS_MORE.map((p, i) => (
+              <li key={p.name} data-reveal style={{ '--i': i % 4 }}>
+                <a className="arch-link" href={p.href} target="_blank" rel="noreferrer">
+                  <span className="arch-idx mono">{String(i + 7).padStart(2, '0')}</span>
+                  <span className="arch-name">{p.label}</span>
+                  <span className="arch-tech mono">{p.tech}</span>
+                  <span className="arch-arrow" aria-hidden="true">
+                    ↗
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* ---------------------------------------------- experience */}
+        <section id="experience" className="section" aria-label="Experience">
+          <SectionHead no="04" title="EXPERIENCE" note="2021 — 2024" />
+          <div className="xps">
+            {EXPERIENCE.map((x, i) => (
+              <article className="xp" key={x.company} data-reveal style={{ '--i': i }}>
+                <div className="xp-when mono">
+                  {x.period.toUpperCase()} · {x.location.toUpperCase()}
+                </div>
+                <h3 className="xp-role">
+                  {x.role} <span className="xp-co">— {x.company}</span>
+                </h3>
+                <ul className="xp-bullets">
+                  {x.bullets.map((b) => (
+                    <li key={b}>{b}</li>
+                  ))}
+                </ul>
+                <ul className="tags mono">
+                  {x.tags.map((t) => (
+                    <li key={t}>{t}</li>
+                  ))}
+                </ul>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* -------------------------------------------------- skills */}
+        <section id="skills" className="section" aria-label="Skills">
+          <SectionHead no="05" title="PARTS LIST" note="BILL OF MATERIALS" />
+          <div className="bom">
+            {SKILLS.map((g, i) => (
+              <div className="bom-row" key={g.label} data-reveal style={{ '--i': i }}>
+                <span className="bom-label mono">{g.label.toUpperCase()}</span>
+                <span className="bom-items">{g.items.join(' · ')}</span>
+                <span className="bom-qty mono">×{g.items.length}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ------------------------------------------------- contact */}
+        <section id="contact" className="section contact" aria-label="Contact">
+          <SectionHead no="06" title="GET IN TOUCH" note="NO FORM. JUST MAIL." />
+          <a className="mail" href={`mailto:${LINKS.email}`} data-reveal>
+            {LINKS.email}
+          </a>
+          <div className="contact-links mono" data-reveal style={{ '--i': 1 }}>
+            <a href={LINKS.github} target="_blank" rel="noreferrer">
+              GITHUB ↗
+            </a>
+            <a href={LINKS.linkedin} target="_blank" rel="noreferrer">
+              LINKEDIN ↗
+            </a>
+            <a href={LINKS.demos}>ALL DEMOS ↗</a>
+          </div>
+        </section>
+      </main>
+
+      <footer className="footer">
+        <p className="mono">
+          © 2026 TEJAS RAMANUJAM — SET IN ARCHIVO &amp; FRAGMENT MONO. BACKGROUND PLOTTED LIVE BY A
+          FLOW-FIELD PEN. BUILT WITH REACT + VITE.
+        </p>
+        <p className="mono footer-hint">PRESS “G” TO TOGGLE THE DRAFTING GRID.</p>
+      </footer>
+    </>
+  );
+}
