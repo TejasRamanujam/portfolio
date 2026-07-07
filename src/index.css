@@ -672,7 +672,11 @@ main {
 }
 .xp {
   display: grid;
-  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+  grid-template-areas:
+    'role when'
+    'bullets .'
+    'tags .';
   gap: 0.8rem 3rem;
   border-bottom: 1px solid var(--hairline);
   padding: 2rem 0;
@@ -681,9 +685,13 @@ main {
   padding-top: 0.5rem;
 }
 .xp-when {
+  grid-area: when;
+  justify-self: end;
+  text-align: right;
   color: var(--ink-60);
 }
 .xp-role {
+  grid-area: role;
   font-size: clamp(1.3rem, 2.6vw, 2rem);
   font-variation-settings: 'wdth' 110, 'wght' 640;
   line-height: 1.1;
@@ -694,7 +702,7 @@ main {
   font-variation-settings: 'wdth' 100, 'wght' 480;
 }
 .xp-bullets {
-  grid-column: 2;
+  grid-area: bullets;
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
@@ -714,55 +722,148 @@ main {
   color: var(--blue);
 }
 .xp .tags {
-  grid-column: 2;
+  grid-area: tags;
   padding-top: 0.2rem;
 }
 
 @media (max-width: 760px) {
   .xp {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      'role'
+      'when'
+      'bullets'
+      'tags';
   }
-  .xp-bullets,
-  .xp .tags {
-    grid-column: 1;
+  .xp-when {
+    justify-self: start;
+    text-align: left;
   }
 }
 
-/* ── parts list (skills) ────────────────────────────────── */
+/* ── skills / parts list ────────────────────────────────── */
+
+.skills-board {
+  display: grid;
+  grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+  gap: 2.5rem;
+  align-items: start;
+}
 
 .bom {
   border-bottom: 1px solid var(--hairline);
 }
 .bom-row {
   display: grid;
-  grid-template-columns: 11rem minmax(0, 1fr) auto;
-  gap: 1.5rem;
-  align-items: baseline;
+  grid-template-columns: 10rem minmax(0, 1fr) auto;
+  gap: 1.25rem;
+  align-items: start;
   border-top: 1px solid var(--hairline);
   padding: 1.15rem 0.25rem;
-  transition: background 0.3s var(--ease);
-}
-.bom-row:hover {
-  background: rgba(25, 23, 18, 0.035);
 }
 .bom-label {
   color: var(--blue);
+  padding-top: 0.35em;
 }
-.bom-items {
-  font-size: clamp(1rem, 1.8vw, 1.35rem);
-  font-variation-settings: 'wdth' 106, 'wght' 500;
-  line-height: 1.45;
+.bom-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.chip {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  background: none;
+  border: 1px solid var(--hairline);
+  color: var(--ink-60);
+  padding: 0.38em 0.85em;
+  cursor: pointer;
+  transition:
+    border-color 0.25s var(--ease),
+    color 0.25s var(--ease),
+    background 0.25s var(--ease);
+}
+.chip:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+.chip[aria-pressed='true'] {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: var(--blue-soft);
 }
 .bom-qty {
   color: var(--ink-40);
+  padding-top: 0.35em;
+}
+
+.legend {
+  position: sticky;
+  top: 5rem;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  padding: 1.1rem 1.25rem 1.35rem;
+  min-height: 9rem;
+}
+.legend-head {
+  color: var(--ink-40);
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 0.55rem;
+  margin-bottom: 0.85rem;
+}
+.legend-skill {
+  font-size: clamp(1.25rem, 2vw, 1.6rem);
+  font-variation-settings: 'wdth' 118, 'wght' 720;
+  line-height: 1.1;
+  color: var(--blue);
+  margin-bottom: 0.7rem;
+}
+.legend-refs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.legend-refs li {
+  padding-left: 1.1rem;
+  position: relative;
+  color: var(--ink-60);
+}
+.legend-refs li::before {
+  content: '◆';
+  position: absolute;
+  left: 0;
+  color: var(--blue);
+  font-size: 0.55rem;
+  top: 0.35em;
+}
+.legend-refs a:hover {
+  color: var(--blue);
+}
+.legend-empty {
+  color: var(--ink-40);
+}
+
+@media (max-width: 860px) {
+  .skills-board {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  .legend {
+    order: -1;
+    top: 3.6rem;
+    z-index: 5;
+    min-height: 0;
+  }
 }
 
 @media (max-width: 700px) {
   .bom-row {
     grid-template-columns: 1fr auto;
   }
-  .bom-items {
+  .bom-chips {
     grid-column: 1 / -1;
+    grid-row: 2;
   }
 }
 

@@ -1,13 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { EXPERIENCE, PROJECTS_FEATURED, PROJECTS_MORE, SKILLS } from './data.js';
+import { CONTACT, EDUCATION, EXPERIENCE, PROJECTS_FEATURED, PROJECTS_MORE, SKILLS } from './data.js';
 import { createPlotter } from './plotter.js';
-
-const LINKS = {
-  github: 'https://github.com/TejasRamanujam',
-  linkedin: 'https://linkedin.com/in/tejas-ramanujam',
-  email: 'tejasrama143@gmail.com',
-  demos: 'https://tejas-live-demos.vercel.app',
-};
 
 const prefersReduced = () =>
   typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -196,6 +189,70 @@ function WorkRow({ p, i, onInk }) {
   );
 }
 
+/* Skills as an interactive parts list: click a part, the legend
+   plots the builds where it was actually used. */
+function SkillsBoard() {
+  const [sel, setSel] = useState(null); // { id, name, refs }
+  return (
+    <div className="skills-board">
+      <div className="bom">
+        {SKILLS.map((g, i) => (
+          <div className="bom-row" key={g.label} data-reveal style={{ '--i': i }}>
+            <span className="bom-label mono">{g.label.toUpperCase()}</span>
+            <div className="bom-chips" role="group" aria-label={`${g.label} skills`}>
+              {g.items.map((it) => {
+                const id = `${g.label}:${it.name}`;
+                const pressed = !!(sel && sel.id === id);
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    className="chip mono"
+                    aria-pressed={pressed}
+                    onClick={() =>
+                      setSel((s) => (s && s.id === id ? null : { id, name: it.name, refs: it.refs }))
+                    }
+                  >
+                    {it.name}
+                  </button>
+                );
+              })}
+            </div>
+            <span className="bom-qty mono">×{g.items.length}</span>
+          </div>
+        ))}
+      </div>
+      <aside className="legend" aria-live="polite">
+        <p className="legend-head mono">LEGEND</p>
+        {sel ? (
+          <>
+            <p className="legend-skill">{sel.name}</p>
+            {sel.refs.length ? (
+              <ul className="legend-refs">
+                {sel.refs.map((r) => (
+                  <li key={r.label} className="mono">
+                    {r.href ? (
+                      <a href={r.href} target="_blank" rel="noreferrer">
+                        {r.label} ↗
+                      </a>
+                    ) : (
+                      <span>{r.label}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mono legend-empty">NO INDEXED BUILDS ON THIS SHEET.</p>
+            )}
+          </>
+        ) : (
+          <p className="mono legend-empty">CLICK A PART TO PLOT ITS BUILDS.</p>
+        )}
+      </aside>
+    </div>
+  );
+}
+
 /* ----------------------------------------------------------------- app */
 
 export default function App() {
@@ -242,7 +299,13 @@ export default function App() {
   // Easter egg: G toggles the drafting grid
   useEffect(() => {
     const onKey = (e) => {
-      if (e.key.toLowerCase() === 'g' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      if (
+        e.key.toLowerCase() === 'g' &&
+        !e.metaKey &&
+        !e.ctrlKey &&
+        !e.altKey &&
+        !/^(input|textarea|button|a)$/i.test(e.target.tagName)
+      ) {
         document.body.classList.toggle('show-grid');
       }
     };
@@ -268,8 +331,8 @@ export default function App() {
           T·RAMANUJAM<span className="mark-ext"> — SHEET 01</span>
         </span>
         <nav className="topnav mono" aria-label="Sections">
-          <a href="#work">WORK</a>
           <a href="#experience">EXPERIENCE</a>
+          <a href="#work">WORK</a>
           <a href="#skills">SKILLS</a>
           <a href="#contact">CONTACT</a>
         </nav>
@@ -300,11 +363,19 @@ export default function App() {
             <dl className="meta mono">
               <div>
                 <dt>EDUCATION</dt>
-                <dd>B.S. SOFTWARE ENGINEERING — UT DALLAS &rsquo;26</dd>
+                <dd>B.S. SOFTWARE ENGINEERING — UT DALLAS &rsquo;27</dd>
+              </div>
+              <div>
+                <dt>MINOR</dt>
+                <dd>{EDUCATION.minor.toUpperCase()}</dd>
               </div>
               <div>
                 <dt>GPA</dt>
-                <dd>3.87 / 4.00</dd>
+                <dd>{EDUCATION.gpa} / 4.00</dd>
+              </div>
+              <div>
+                <dt>COURSEWORK</dt>
+                <dd>{EDUCATION.coursework.join(' · ').toUpperCase()}</dd>
               </div>
               <div>
                 <dt>BASED IN</dt>
@@ -313,13 +384,13 @@ export default function App() {
             </dl>
           </div>
           <div className="hero-cta" data-reveal style={{ '--i': 4 }}>
-            <a className="btn mono" href={LINKS.github} target="_blank" rel="noreferrer">
+            <a className="btn mono" href={CONTACT.github} target="_blank" rel="noreferrer">
               GITHUB ↗
             </a>
-            <a className="btn mono" href={LINKS.linkedin} target="_blank" rel="noreferrer">
+            <a className="btn mono" href={CONTACT.linkedin} target="_blank" rel="noreferrer">
               LINKEDIN ↗
             </a>
-            <a className="btn btn-solid mono" href={`mailto:${LINKS.email}`}>
+            <a className="btn btn-solid mono" href={`mailto:${CONTACT.email}`}>
               EMAIL ME
             </a>
           </div>
@@ -337,47 +408,18 @@ export default function App() {
           </div>
         </div>
 
-        {/* ---------------------------------------------------- work */}
-        <section id="work" className="section" aria-label="Selected work">
-          <SectionHead no="02" title="SELECTED WORK" note={`${PROJECTS_FEATURED.length} BUILDS`} />
-          <ol className="works">
-            {PROJECTS_FEATURED.map((p, i) => (
-              <WorkRow key={p.name} p={p} i={i} onInk={ink} />
-            ))}
-          </ol>
-        </section>
-
-        {/* ------------------------------------------------- archive */}
-        <section className="section" aria-label="Project archive">
-          <SectionHead no="03" title="ARCHIVE" note={`INDEX 07 — ${6 + PROJECTS_MORE.length}`} />
-          <ul className="arch">
-            {PROJECTS_MORE.map((p, i) => (
-              <li key={p.name} data-reveal style={{ '--i': i % 4 }}>
-                <a className="arch-link" href={p.href} target="_blank" rel="noreferrer">
-                  <span className="arch-idx mono">{String(i + 7).padStart(2, '0')}</span>
-                  <span className="arch-name">{p.label}</span>
-                  <span className="arch-tech mono">{p.tech}</span>
-                  <span className="arch-arrow" aria-hidden="true">
-                    ↗
-                  </span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-
         {/* ---------------------------------------------- experience */}
         <section id="experience" className="section" aria-label="Experience">
-          <SectionHead no="04" title="EXPERIENCE" note="2021 — 2024" />
+          <SectionHead no="02" title="EXPERIENCE" note="2021 — PRESENT" />
           <div className="xps">
             {EXPERIENCE.map((x, i) => (
               <article className="xp" key={x.company} data-reveal style={{ '--i': i }}>
-                <div className="xp-when mono">
-                  {x.period.toUpperCase()} · {x.location.toUpperCase()}
-                </div>
                 <h3 className="xp-role">
                   {x.role} <span className="xp-co">— {x.company}</span>
                 </h3>
+                <div className="xp-when mono">
+                  {x.period.toUpperCase()} · {x.location.toUpperCase()}
+                </div>
                 <ul className="xp-bullets">
                   {x.bullets.map((b) => (
                     <li key={b}>{b}</li>
@@ -393,34 +435,64 @@ export default function App() {
           </div>
         </section>
 
+        {/* ---------------------------------------------------- work */}
+        <section id="work" className="section" aria-label="Selected work">
+          <SectionHead
+            no="03"
+            title="SELECTED WORK"
+            note={`${PROJECTS_FEATURED.length} LIVE BUILDS`}
+          />
+          <ol className="works">
+            {PROJECTS_FEATURED.map((p, i) => (
+              <WorkRow key={p.name} p={p} i={i} onInk={ink} />
+            ))}
+          </ol>
+        </section>
+
         {/* -------------------------------------------------- skills */}
         <section id="skills" className="section" aria-label="Skills">
-          <SectionHead no="05" title="PARTS LIST" note="BILL OF MATERIALS" />
-          <div className="bom">
-            {SKILLS.map((g, i) => (
-              <div className="bom-row" key={g.label} data-reveal style={{ '--i': i }}>
-                <span className="bom-label mono">{g.label.toUpperCase()}</span>
-                <span className="bom-items">{g.items.join(' · ')}</span>
-                <span className="bom-qty mono">×{g.items.length}</span>
-              </div>
+          <SectionHead no="04" title="SKILLS / PARTS LIST" note="BILL OF MATERIALS" />
+          <SkillsBoard />
+        </section>
+
+        {/* ------------------------------------------------- archive */}
+        <section className="section" aria-label="Project archive">
+          <SectionHead
+            no="05"
+            title="ARCHIVE"
+            note={`INDEX 06 — ${5 + PROJECTS_MORE.length}`}
+          />
+          <ul className="arch">
+            {PROJECTS_MORE.map((p, i) => (
+              <li key={p.name} data-reveal style={{ '--i': i % 4 }}>
+                <a className="arch-link" href={p.href} target="_blank" rel="noreferrer">
+                  <span className="arch-idx mono">{String(i + 6).padStart(2, '0')}</span>
+                  <span className="arch-name">{p.label}</span>
+                  <span className="arch-tech mono">{p.tech}</span>
+                  <span className="arch-arrow" aria-hidden="true">
+                    ↗
+                  </span>
+                </a>
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
 
         {/* ------------------------------------------------- contact */}
         <section id="contact" className="section contact" aria-label="Contact">
           <SectionHead no="06" title="GET IN TOUCH" note="NO FORM. JUST MAIL." />
-          <a className="mail" href={`mailto:${LINKS.email}`} data-reveal>
-            {LINKS.email}
+          <a className="mail" href={`mailto:${CONTACT.email}`} data-reveal>
+            {CONTACT.email}
           </a>
           <div className="contact-links mono" data-reveal style={{ '--i': 1 }}>
-            <a href={LINKS.github} target="_blank" rel="noreferrer">
+            <a href={`tel:+1${CONTACT.phone.replace(/-/g, '')}`}>{CONTACT.phone}</a>
+            <a href={CONTACT.github} target="_blank" rel="noreferrer">
               GITHUB ↗
             </a>
-            <a href={LINKS.linkedin} target="_blank" rel="noreferrer">
+            <a href={CONTACT.linkedin} target="_blank" rel="noreferrer">
               LINKEDIN ↗
             </a>
-            <a href={LINKS.demos}>ALL DEMOS ↗</a>
+            <a href={CONTACT.demos}>ALL DEMOS ↗</a>
           </div>
         </section>
       </main>
