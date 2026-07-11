@@ -474,6 +474,12 @@ export default function App() {
           </ol>
         </section>
 
+        {/* -------------------------------------------------- skills */}
+        <section id="skills" className="section" aria-label="Skills">
+          <SectionHead no="04" title="SKILLS / PARTS LIST" note="BILL OF MATERIALS" />
+          <SkillsBoard active={activeSkills} onToggle={toggleSkill} onClear={() => setActiveSkills([])} />
+        </section>
+
         {/* --------------------------------- sheet 02 cross-reference */}
         <section className="section sheetref-wrap" aria-label="Live demos catalogue">
           <a
@@ -531,12 +537,6 @@ export default function App() {
               ))}
             </svg>
           </a>
-        </section>
-
-        {/* -------------------------------------------------- skills */}
-        <section id="skills" className="section" aria-label="Skills">
-          <SectionHead no="04" title="SKILLS / PARTS LIST" note="BILL OF MATERIALS" />
-          <SkillsBoard active={activeSkills} onToggle={toggleSkill} onClear={() => setActiveSkills([])} />
         </section>
 
         {/* ------------------------------------------------- archive */}
