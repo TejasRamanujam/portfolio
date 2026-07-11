@@ -474,6 +474,65 @@ export default function App() {
           </ol>
         </section>
 
+        {/* --------------------------------- sheet 02 cross-reference */}
+        <section className="section sheetref-wrap" aria-label="Live demos catalogue">
+          <a
+            className="sheetref"
+            href="https://tejas-live-demos.vercel.app"
+            target="_blank"
+            rel="noreferrer"
+            data-reveal
+          >
+            <div className="sheetref-body">
+              <p className="mono sheetref-note">SEE DETAIL → SHEET 02 · INDEX OF LIVE SOFTWARE</p>
+              <p className="sheetref-title">
+                Five <em>living</em> machines
+              </p>
+              <p className="sheetref-sub">
+                Every build above, running right now in one catalogue — draw on it, search it,
+                talk to it.
+              </p>
+              <span className="mono sheetref-cta">OPEN THE CATALOGUE ↗</span>
+            </div>
+            <svg
+              className="sheetref-fig"
+              viewBox="0 0 180 130"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <rect x="6" y="6" width="168" height="118" fill="none" stroke="currentColor" strokeWidth="1.4" />
+              <rect x="14" y="14" width="152" height="102" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3 3" />
+              {[0, 1, 2, 3, 4].map((i) => (
+                <g key={i}>
+                  <rect
+                    x={26 + i * 26}
+                    y={38 - (i % 2) * 10}
+                    width="20"
+                    height="20"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.1"
+                    className="sheetref-plate"
+                    style={{ animationDelay: `${i * 0.35}s` }}
+                  />
+                  <line
+                    x1={36 + i * 26}
+                    y1={58 - (i % 2) * 10 + 1}
+                    x2={36 + i * 26}
+                    y2="92"
+                    stroke="currentColor"
+                    strokeWidth="0.6"
+                    strokeDasharray="2 3"
+                  />
+                  <text x={32 + i * 26} y="104" className="sheetref-no">
+                    0{i + 1}
+                  </text>
+                </g>
+              ))}
+            </svg>
+          </a>
+        </section>
+
         {/* -------------------------------------------------- skills */}
         <section id="skills" className="section" aria-label="Skills">
           <SectionHead no="04" title="SKILLS / PARTS LIST" note="BILL OF MATERIALS" />

@@ -953,3 +953,56 @@ main {
 }
 .bom-clear:hover { background: var(--blue); color: var(--paper); }
 .legend-block + .legend-block { margin-top: 1rem; border-top: 1px solid var(--hairline); padding-top: 0.9rem; }
+
+/* ── sheet 02 cross-reference band ─────────────────────── */
+.sheetref-wrap { padding-top: 0; }
+.sheetref {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: clamp(1.5rem, 4vw, 4rem);
+  border: 1.5px solid var(--ink);
+  padding: clamp(1.4rem, 3.5vw, 2.6rem) clamp(1.4rem, 4vw, 3rem);
+  position: relative;
+  transition: background 0.35s var(--ease), color 0.35s var(--ease);
+}
+.sheetref::before,
+.sheetref::after {
+  content: '';
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--ink);
+}
+.sheetref::before { top: -5px; left: -5px; background: var(--paper); }
+.sheetref::after { bottom: -5px; right: -5px; background: var(--paper); }
+.sheetref:hover { background: var(--ink); color: var(--paper); }
+.sheetref:hover .sheetref-note,
+.sheetref:hover .sheetref-sub { color: inherit; opacity: 0.75; }
+.sheetref-note { color: var(--blue); margin-bottom: 0.9rem; }
+.sheetref-title {
+  font-size: clamp(2rem, 5.5vw, 4.2rem);
+  font-variation-settings: 'wdth' 116, 'wght' 780;
+  line-height: 0.95;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+.sheetref-title em {
+  font-style: normal;
+  color: var(--blue);
+}
+.sheetref:hover .sheetref-title em { color: var(--paper); }
+.sheetref-sub { color: var(--ink-60); margin-top: 0.8rem; max-width: 34rem; }
+.sheetref-cta { display: inline-block; margin-top: 1.2rem; border-bottom: 1px solid currentColor; }
+.sheetref-fig { width: clamp(140px, 16vw, 200px); color: inherit; }
+.sheetref-no { font-family: var(--font-mono); font-size: 8px; fill: currentColor; }
+@keyframes plate-pop {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+.sheetref-plate { animation: plate-pop 3.2s var(--ease) infinite; }
+@media (prefers-reduced-motion: reduce) { .sheetref-plate { animation: none; } }
+@media (max-width: 720px) {
+  .sheetref { grid-template-columns: 1fr; }
+  .sheetref-fig { display: none; }
+}
