@@ -327,7 +327,7 @@ export default function App() {
       els.forEach((el) => {
         if (el.classList.contains('in')) return;
         const r = el.getBoundingClientRect();
-        if (r.top < vh * 0.96 && r.bottom > 0) el.classList.add('in');
+        if (r.top < vh * 0.96) el.classList.add('in');
       });
     };
     let st = 0;
