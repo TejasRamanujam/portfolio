@@ -318,7 +318,36 @@ export default function App() {
       { rootMargin: '0px 0px -8% 0px', threshold: 0.05 },
     );
     els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
+
+    // Self-healing fallback: browsers can stop delivering IO callbacks after
+    // long idle/sleep, leaving sections invisible. Sweep anything already in
+    // view that never got revealed.
+    const sweep = () => {
+      const vh = window.innerHeight;
+      els.forEach((el) => {
+        if (el.classList.contains('in')) return;
+        const r = el.getBoundingClientRect();
+        if (r.top < vh * 0.96 && r.bottom > 0) el.classList.add('in');
+      });
+    };
+    let st = 0;
+    const onScroll = () => {
+      clearTimeout(st);
+      st = setTimeout(sweep, 140);
+    };
+    const onVis = () => {
+      if (!document.hidden) sweep();
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    document.addEventListener('visibilitychange', onVis);
+    const iv = setInterval(sweep, 4000);
+    return () => {
+      io.disconnect();
+      window.removeEventListener('scroll', onScroll);
+      document.removeEventListener('visibilitychange', onVis);
+      clearInterval(iv);
+      clearTimeout(st);
+    };
   }, [reduced]);
 
   // Easter egg: G toggles the drafting grid
