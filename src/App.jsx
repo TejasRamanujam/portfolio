@@ -424,7 +424,7 @@ export default function App() {
         {/* -------------------------------------------------- ticker */}
         <div className="ticker" aria-hidden="true">
           <div className="ticker-track mono">
-            {[0, 1].map((k) => (
+            {[0, 1, 2, 3].map((k) => (
               <span key={k}>
                 AI SYSTEMS — FULL-STACK PRODUCTS — OPEN-SOURCE TOOLS — LLM PIPELINES — FASTAPI
                 BACKENDS — REACT FRONTENDS — MULTI-AGENT ORCHESTRATION —&nbsp;
