@@ -24,8 +24,8 @@
   --ink-60: rgba(25, 23, 18, 0.6);
   --ink-40: rgba(25, 23, 18, 0.4);
   --hairline: rgba(25, 23, 18, 0.16);
-  --blue: #2430ee;
-  --blue-soft: rgba(36, 48, 238, 0.12);
+  --blue: #d8410c;
+  --blue-soft: rgba(216, 65, 12, 0.12);
   --font-display: 'Archivo Var', 'Archivo', Impact, sans-serif;
   --font-mono: 'Fragment Mono', ui-monospace, 'Courier New', monospace;
   --pad: clamp(1rem, 4vw, 4rem);
@@ -133,10 +133,10 @@ ol {
   background:
     repeating-linear-gradient(
       to right,
-      rgba(36, 48, 238, 0.14) 0 1px,
+      rgba(216, 65, 12, 0.14) 0 1px,
       transparent 1px calc(100% / 12)
     ),
-    repeating-linear-gradient(to bottom, rgba(36, 48, 238, 0.08) 0 1px, transparent 1px 7rem);
+    repeating-linear-gradient(to bottom, rgba(216, 65, 12, 0.08) 0 1px, transparent 1px 7rem);
 }
 body.show-grid .grid-overlay {
   opacity: 1;
@@ -928,3 +928,19 @@ main {
     display: none;
   }
 }
+
+/* sheet filtering (skills multi-select) */
+.ghosted {
+  opacity: 0.14;
+  filter: grayscale(1);
+  transition: opacity 0.45s var(--ease), filter 0.45s var(--ease);
+}
+.xp, .works > li, .arch > li { transition: opacity 0.45s var(--ease), filter 0.45s var(--ease); }
+.bom-filter { color: var(--ink-60); margin-bottom: 1.1rem; }
+.bom-clear {
+  font: inherit; letter-spacing: inherit; cursor: pointer;
+  background: none; border: 1px solid var(--hairline); padding: 0.15em 0.7em;
+  color: var(--blue); margin-left: 0.5em;
+}
+.bom-clear:hover { background: var(--blue); color: var(--paper); }
+.legend-block + .legend-block { margin-top: 1rem; border-top: 1px solid var(--hairline); padding-top: 0.9rem; }

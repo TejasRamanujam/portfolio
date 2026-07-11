@@ -32,7 +32,7 @@ export function createPlotter(canvas, { reducedMotion = false } = {}) {
   const pointer = { x: -9999, y: -9999, vx: 0, vy: 0, on: false };
 
   const INK = 'rgba(25, 23, 18,';
-  const BLUE = 'rgba(36, 48, 238,';
+  const BLUE = 'rgba(216, 65, 12,';
 
   let particles = [];
 

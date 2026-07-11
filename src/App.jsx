@@ -154,9 +154,9 @@ function SectionHead({ no, title, note }) {
   );
 }
 
-function WorkRow({ p, i, onInk }) {
+function WorkRow({ p, i, onInk, ghost }) {
   return (
-    <li className="work-row" data-reveal style={{ '--i': i }}>
+    <li className={`work-row${ghost ? ' ghosted' : ''}`} data-reveal style={{ '--i': i }}>
       <a
         className="work-link"
         href={p.href}
@@ -191,32 +191,51 @@ function WorkRow({ p, i, onInk }) {
 
 /* Skills as an interactive parts list: click a part, the legend
    plots the builds where it was actually used. */
-function SkillsBoard() {
-  const [sel, setSel] = useState(null); // { id, name, refs }
+const norm = (v) => String(v).trim().toLowerCase();
+const skillHits = (list, sel) =>
+  sel.every((sk) => list.some((t) => norm(t).includes(norm(sk)) || norm(sk).includes(norm(t))));
+export function matchesSkills(item, sel) {
+  if (!sel.length) return true;
+  const raw = item.tech ?? item.tags ?? [];
+  const list = Array.isArray(raw) ? raw : String(raw).split(/[·,/|]+/);
+  return skillHits(list, sel);
+}
+
+/* Skills as an interactive parts list: multi-select parts to FILTER the
+   whole sheet (experience + work + archive dim to ghosts), legend plots
+   the selected parts' builds. */
+function SkillsBoard({ active, onToggle, onClear }) {
+  const selected = SKILLS.flatMap((g) => g.items).filter((it) => active.includes(it.name));
   return (
     <div className="skills-board">
       <div className="bom">
+        <p className="bom-filter mono" aria-live="polite">
+          {active.length ? (
+            <>
+              FILTERING SHEET BY {active.length} PART{active.length > 1 ? 'S' : ''} (AND){' '}
+              <button type="button" className="bom-clear mono" onClick={onClear}>
+                × CLEAR
+              </button>
+            </>
+          ) : (
+            'SELECT PARTS TO FILTER THE WHOLE SHEET — EXPERIENCE, WORK & ARCHIVE.'
+          )}
+        </p>
         {SKILLS.map((g, i) => (
           <div className="bom-row" key={g.label} data-reveal style={{ '--i': i }}>
             <span className="bom-label mono">{g.label.toUpperCase()}</span>
             <div className="bom-chips" role="group" aria-label={`${g.label} skills`}>
-              {g.items.map((it) => {
-                const id = `${g.label}:${it.name}`;
-                const pressed = !!(sel && sel.id === id);
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    className="chip mono"
-                    aria-pressed={pressed}
-                    onClick={() =>
-                      setSel((s) => (s && s.id === id ? null : { id, name: it.name, refs: it.refs }))
-                    }
-                  >
-                    {it.name}
-                  </button>
-                );
-              })}
+              {g.items.map((it) => (
+                <button
+                  key={it.name}
+                  type="button"
+                  className="chip mono"
+                  aria-pressed={active.includes(it.name)}
+                  onClick={() => onToggle(it.name)}
+                >
+                  {it.name}
+                </button>
+              ))}
             </div>
             <span className="bom-qty mono">×{g.items.length}</span>
           </div>
@@ -224,29 +243,29 @@ function SkillsBoard() {
       </div>
       <aside className="legend" aria-live="polite">
         <p className="legend-head mono">LEGEND</p>
-        {sel ? (
-          <>
-            <p className="legend-skill">{sel.name}</p>
-            {sel.refs.length ? (
-              <ul className="legend-refs">
-                {sel.refs.map((r) => (
-                  <li key={r.label} className="mono">
-                    {r.href ? (
-                      <a href={r.href} target="_blank" rel="noreferrer">
-                        {r.label} ↗
-                      </a>
-                    ) : (
-                      <span>{r.label}</span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="mono legend-empty">NO INDEXED BUILDS ON THIS SHEET.</p>
-            )}
-          </>
+        {selected.length ? (
+          selected.map((sel) => (
+            <div key={sel.name} className="legend-block">
+              <p className="legend-skill">{sel.name}</p>
+              {sel.refs.length ? (
+                <ul className="legend-refs">
+                  {sel.refs.map((r) => (
+                    <li key={r.label} className="mono">
+                      {r.href ? (
+                        <a href={r.href} target="_blank" rel="noreferrer">{r.label} ↗</a>
+                      ) : (
+                        <span>{r.label}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mono legend-empty">NO INDEXED BUILDS ON THIS SHEET.</p>
+              )}
+            </div>
+          ))
         ) : (
-          <p className="mono legend-empty">CLICK A PART TO PLOT ITS BUILDS.</p>
+          <p className="mono legend-empty">CLICK PARTS TO PLOT THEIR BUILDS.</p>
         )}
       </aside>
     </div>
@@ -257,6 +276,9 @@ function SkillsBoard() {
 
 export default function App() {
   const reduced = useRef(prefersReduced()).current;
+  const [activeSkills, setActiveSkills] = useState([]);
+  const toggleSkill = (n) =>
+    setActiveSkills((prev) => (prev.includes(n) ? prev.filter((x) => x !== n) : [...prev, n]));
   const fine = useRef(
     typeof matchMedia !== 'undefined' && matchMedia('(pointer: fine)').matches,
   ).current;
@@ -413,7 +435,7 @@ export default function App() {
           <SectionHead no="02" title="EXPERIENCE" note="2021 — PRESENT" />
           <div className="xps">
             {EXPERIENCE.map((x, i) => (
-              <article className="xp" key={x.company} data-reveal style={{ '--i': i }}>
+              <article className={`xp${matchesSkills(x, activeSkills) ? '' : ' ghosted'}`} key={x.company} data-reveal style={{ '--i': i }}>
                 <h3 className="xp-role">
                   {x.role} <span className="xp-co">— {x.company}</span>
                 </h3>
@@ -444,7 +466,7 @@ export default function App() {
           />
           <ol className="works">
             {PROJECTS_FEATURED.map((p, i) => (
-              <WorkRow key={p.name} p={p} i={i} onInk={ink} />
+              <WorkRow key={p.name} p={p} i={i} onInk={ink} ghost={!matchesSkills(p, activeSkills)} />
             ))}
           </ol>
         </section>
@@ -452,7 +474,7 @@ export default function App() {
         {/* -------------------------------------------------- skills */}
         <section id="skills" className="section" aria-label="Skills">
           <SectionHead no="04" title="SKILLS / PARTS LIST" note="BILL OF MATERIALS" />
-          <SkillsBoard />
+          <SkillsBoard active={activeSkills} onToggle={toggleSkill} onClear={() => setActiveSkills([])} />
         </section>
 
         {/* ------------------------------------------------- archive */}
@@ -464,7 +486,7 @@ export default function App() {
           />
           <ul className="arch">
             {PROJECTS_MORE.map((p, i) => (
-              <li key={p.name} data-reveal style={{ '--i': i % 4 }}>
+              <li key={p.name} className={matchesSkills(p, activeSkills) ? undefined : 'ghosted'} data-reveal style={{ '--i': i % 4 }}>
                 <a className="arch-link" href={p.href} target="_blank" rel="noreferrer">
                   <span className="arch-idx mono">{String(i + 6).padStart(2, '0')}</span>
                   <span className="arch-name">{p.label}</span>
