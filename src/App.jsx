@@ -189,16 +189,18 @@ function WorkRow({ p, i, onInk, ghost }) {
   );
 }
 
-/* Skills as an interactive parts list: click a part, the legend
-   plots the builds where it was actually used. */
 const norm = (v) => String(v).trim().toLowerCase();
-const skillHits = (list, sel) =>
-  sel.every((sk) => list.some((t) => norm(t).includes(norm(sk)) || norm(sk).includes(norm(t))));
-export function matchesSkills(item, sel) {
-  if (!sel.length) return true;
-  const raw = item.tech ?? item.tags ?? [];
-  const list = Array.isArray(raw) ? raw : String(raw).split(/[·,/|]+/);
-  return skillHits(list, sel);
+/* An item is "attached" to a skill when it appears in that skill's
+   curated refs (same href for builds; company prefix for roles). */
+const refHits = (item, sk) =>
+  sk.refs.some((r) => {
+    if (r.href && item.href) return r.href === item.href;
+    if (!r.href && item.company) return norm(r.label).startsWith(norm(item.company.split(' ')[0]));
+    return false;
+  });
+export function matchesSkills(item, selSkills) {
+  if (!selSkills.length) return true;
+  return selSkills.every((sk) => refHits(item, sk));
 }
 
 /* Skills as an interactive parts list: multi-select parts to FILTER the
@@ -277,6 +279,7 @@ function SkillsBoard({ active, onToggle, onClear }) {
 export default function App() {
   const reduced = useRef(prefersReduced()).current;
   const [activeSkills, setActiveSkills] = useState([]);
+  const selSkills = SKILLS.flatMap((g) => g.items).filter((it) => activeSkills.includes(it.name));
   const toggleSkill = (n) =>
     setActiveSkills((prev) => (prev.includes(n) ? prev.filter((x) => x !== n) : [...prev, n]));
   const fine = useRef(
@@ -435,7 +438,7 @@ export default function App() {
           <SectionHead no="02" title="EXPERIENCE" note="2021 — PRESENT" />
           <div className="xps">
             {EXPERIENCE.map((x, i) => (
-              <article className={`xp${matchesSkills(x, activeSkills) ? '' : ' ghosted'}`} key={x.company} data-reveal style={{ '--i': i }}>
+              <article className={`xp${matchesSkills(x, selSkills) ? '' : ' ghosted'}`} key={x.company} data-reveal style={{ '--i': i }}>
                 <h3 className="xp-role">
                   {x.role} <span className="xp-co">— {x.company}</span>
                 </h3>
@@ -466,7 +469,7 @@ export default function App() {
           />
           <ol className="works">
             {PROJECTS_FEATURED.map((p, i) => (
-              <WorkRow key={p.name} p={p} i={i} onInk={ink} ghost={!matchesSkills(p, activeSkills)} />
+              <WorkRow key={p.name} p={p} i={i} onInk={ink} ghost={!matchesSkills(p, selSkills)} />
             ))}
           </ol>
         </section>
@@ -486,7 +489,7 @@ export default function App() {
           />
           <ul className="arch">
             {PROJECTS_MORE.map((p, i) => (
-              <li key={p.name} className={matchesSkills(p, activeSkills) ? undefined : 'ghosted'} data-reveal style={{ '--i': i % 4 }}>
+              <li key={p.name} className={matchesSkills(p, selSkills) ? undefined : 'ghosted'} data-reveal style={{ '--i': i % 4 }}>
                 <a className="arch-link" href={p.href} target="_blank" rel="noreferrer">
                   <span className="arch-idx mono">{String(i + 6).padStart(2, '0')}</span>
                   <span className="arch-name">{p.label}</span>
