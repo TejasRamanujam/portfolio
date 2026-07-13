@@ -84,7 +84,7 @@ export const PROJECTS_FEATURED = [
     highlight: 'LIVE — SPEECH IN, SPEECH OUT',
     tech: ['Next.js', 'Gemini', 'Web Speech API', 'WebGL'],
     desc: 'Voice assistant: speech recognition in, Gemini reasoning, synthesized speech out — visualized as a WebGL shader orb.',
-    href: 'https://tejas-connection.vercel.app',
+    href: 'https://connection-assistant.vercel.app',
     period: 'LIVE',
   },
   {
@@ -94,7 +94,7 @@ export const PROJECTS_FEATURED = [
     highlight: 'LIVE — 18 PROJECTS CATALOGUED',
     tech: ['FastAPI', 'TypeScript', 'SQLAlchemy', 'Neon'],
     desc: 'PMO-style database of 18 CS projects with keyword search, tag filtering, and difficulty categorization via RESTful API.',
-    href: 'https://tejas-neuron.vercel.app',
+    href: 'https://neuron-database.vercel.app',
     period: 'LIVE',
   },
   {
@@ -114,7 +114,7 @@ export const PROJECTS_FEATURED = [
     highlight: 'LIVE — DRAWINGS THAT SURVIVE REFRESH',
     tech: ['React', 'Canvas', 'FastAPI', 'Neon'],
     desc: 'Persistent whiteboard: freehand canvas drawing with boards saved server-side, so nothing is lost on refresh.',
-    href: 'https://tejas-scribbly.vercel.app',
+    href: 'https://scribbly-collab.vercel.app',
     period: 'LIVE',
   },
 ];
@@ -142,10 +142,10 @@ const R = (label, href = null) => ({ label, href });
 
 const REF = {
   portfolio: R('The Working Drawing — this site', `${GH}/portfolio`),
-  connection: R('Connection — voice assistant', 'https://tejas-connection.vercel.app'),
-  neuron: R('Neuron — project database', 'https://tejas-neuron.vercel.app'),
+  connection: R('Connection — voice assistant', 'https://connection-assistant.vercel.app'),
+  neuron: R('Neuron — project database', 'https://neuron-database.vercel.app'),
   neurosurge: R('Neurosurge — second brain', 'https://neurosurge.vercel.app'),
-  scribbly: R('Scribbly — whiteboard', 'https://tejas-scribbly.vercel.app'),
+  scribbly: R('Scribbly — whiteboard', 'https://scribbly-collab.vercel.app'),
   aiops: R('Enterprise AI Ops Hub', `${GH}/enterprise-ai-ops-hub`),
   prophecy: R('Prophecy — AI risk assessor', GH),
   sentiment: R('NLP Sentiment Analysis', `${GH}/SentimentAnalysis`),
