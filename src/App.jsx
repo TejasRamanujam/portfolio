@@ -254,7 +254,7 @@ function SkillsBoard({ active, onToggle, onClear }) {
                   {sel.refs.map((r) => (
                     <li key={r.label} className="mono">
                       {r.href ? (
-                        <a href={r.href} target="_blank" rel="noreferrer">{r.label} ↗</a>
+                        <a href={r.href} target="_blank" rel="noreferrer">{r.label} ↗︎</a>
                       ) : (
                         <span>{r.label}</span>
                       )}
@@ -439,10 +439,13 @@ export default function App() {
           </div>
           <div className="hero-cta" data-reveal style={{ '--i': 4 }}>
             <a className="btn mono" href={CONTACT.github} target="_blank" rel="noreferrer">
-              GITHUB ↗
+              GITHUB ↗︎
             </a>
             <a className="btn mono" href={CONTACT.linkedin} target="_blank" rel="noreferrer">
-              LINKEDIN ↗
+              LINKEDIN ↗︎
+            </a>
+            <a className="btn mono" href="/resume.pdf" target="_blank" rel="noreferrer">
+              RESUME ↗︎
             </a>
             <a className="btn btn-solid mono" href={`mailto:${CONTACT.email}`}>
               EMAIL ME
@@ -527,7 +530,7 @@ export default function App() {
                 Every build above, running right now in one catalogue — draw on it, search it,
                 talk to it.
               </p>
-              <span className="mono sheetref-cta">OPEN THE CATALOGUE ↗</span>
+              <span className="mono sheetref-cta">OPEN THE CATALOGUE ↗︎</span>
             </div>
             <svg
               className="sheetref-fig"
@@ -583,7 +586,7 @@ export default function App() {
                   <span className="arch-name">{p.label}</span>
                   <span className="arch-tech mono">{p.tech}</span>
                   <span className="arch-arrow" aria-hidden="true">
-                    ↗
+                    ↗︎
                   </span>
                 </a>
               </li>
@@ -600,12 +603,15 @@ export default function App() {
           <div className="contact-links mono" data-reveal style={{ '--i': 1 }}>
             <a href={`tel:+1${CONTACT.phone.replace(/-/g, '')}`}>{CONTACT.phone}</a>
             <a href={CONTACT.github} target="_blank" rel="noreferrer">
-              GITHUB ↗
+              GITHUB ↗︎
             </a>
             <a href={CONTACT.linkedin} target="_blank" rel="noreferrer">
-              LINKEDIN ↗
+              LINKEDIN ↗︎
             </a>
-            <a href={CONTACT.demos}>ALL DEMOS ↗</a>
+            <a href={CONTACT.demos}>ALL DEMOS ↗︎</a>
+            <a href="/resume.pdf" target="_blank" rel="noreferrer">
+              RESUME ↗︎
+            </a>
           </div>
         </section>
       </main>
