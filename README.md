@@ -2,7 +2,7 @@
 
 Personal portfolio built as **"The Working Drawing"** — an engineer's drafting sheet brought to life.
 
-**Live:** https://tejas-suminagashi.vercel.app
+**Live:** https://tejasramanujam.vercel.app
 
 ## Design
 
