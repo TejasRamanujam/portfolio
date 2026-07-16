@@ -14,4 +14,10 @@ describe('featured project proof', () => {
     expect(neuron.highlight).toContain('24 PROJECTS');
     expect(neuron.desc).toContain('24 CS projects');
   });
+
+  it('frames every featured build with a distinct outcome-led headline', () => {
+    const headlines = PROJECTS_FEATURED.map((project) => project.headline);
+    expect(headlines.every((headline) => headline.length > 20)).toBe(true);
+    expect(new Set(headlines).size).toBe(PROJECTS_FEATURED.length);
+  });
 });

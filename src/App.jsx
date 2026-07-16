@@ -154,42 +154,108 @@ function SectionHead({ no, title, note }) {
   );
 }
 
-function WorkRow({ p, i, onInk, ghost }) {
+function ProjectFigure({ name, label }) {
+  const common = {
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 1.2,
+    vectorEffect: 'non-scaling-stroke',
+  };
+
   return (
-    <li className={`work-row${ghost ? ' ghosted' : ''}`} data-reveal style={{ '--i': i }}>
-      <a
-        className="work-link"
-        href={p.href}
-        target="_blank"
-        rel="noreferrer"
-        onPointerEnter={(e) => onInk(e.clientX, e.clientY)}
-      >
-        <div className="work-top">
-          <span className="work-idx mono">{String(i + 1).padStart(2, '0')}</span>
-          <h3 className="work-name">{p.label}</h3>
-          <span className="work-type mono">{p.type}</span>
-          <span className="work-period mono">{p.period}</span>
-          <span className="work-arrow" aria-hidden="true">
-            →
-          </span>
-        </div>
-        <div className="work-detail">
-          <div className="work-detail-inner">
-            <p className="work-desc">{p.desc}</p>
-            <p className="work-highlight mono">◆ {p.highlight}</p>
-            <ul className="tags mono">
-              {p.tech.map((t) => (
-                <li key={t}>{t}</li>
-              ))}
-            </ul>
+    <figure className={`project-figure figure-${name}`} aria-label={`${label} system diagram`}>
+      <svg viewBox="0 0 480 300" role="img">
+        <rect className="figure-frame" x="12" y="12" width="456" height="276" rx="2" {...common} />
+        <path className="figure-guide" d="M36 46H444M36 254H444M72 28V272M408 28V272" {...common} />
+
+        {name === 'working-drawing' && (
+          <>
+            <path className="figure-primary" d="M45 224C109 88 154 266 224 128S347 68 436 188" {...common} />
+            <path d="M45 198C120 84 173 230 238 112S360 92 436 160" {...common} />
+            <path d="M45 250C120 120 171 282 246 156S368 96 436 214" {...common} />
+          </>
+        )}
+        {name === 'connection' && (
+          <>
+            <circle className="figure-primary" cx="240" cy="150" r="76" {...common} />
+            <circle cx="240" cy="150" r="48" {...common} />
+            <path d="M45 150H112L130 121L153 187L178 103L204 150H276L300 116L322 179L348 130L370 150H435" {...common} />
+          </>
+        )}
+        {name === 'neuron' && (
+          <>
+            {[0, 1, 2, 3].map((row) =>
+              [0, 1, 2, 3, 4, 5].map((col) => (
+                <rect
+                  key={`${row}-${col}`}
+                  className={row === 1 && col === 3 ? 'figure-primary' : undefined}
+                  x={78 + col * 58}
+                  y={70 + row * 42}
+                  width="36"
+                  height="22"
+                  {...common}
+                />
+              )),
+            )}
+          </>
+        )}
+        {name === 'neurosurge' && (
+          <>
+            <path d="M116 190L186 103L242 157L319 84L374 192L287 229L242 157L151 238L116 190Z" {...common} />
+            {[[116,190],[186,103],[242,157],[319,84],[374,192],[287,229],[151,238]].map(([cx, cy], i) => (
+              <circle key={i} className={i === 2 ? 'figure-primary' : undefined} cx={cx} cy={cy} r={i === 2 ? 15 : 9} {...common} />
+            ))}
+          </>
+        )}
+        {name === 'scribbly' && (
+          <>
+            <path className="figure-primary" d="M67 205C104 62 163 261 213 127S309 80 348 189S399 230 431 99" {...common} />
+            <path d="M91 91L148 65M347 235L407 210" {...common} />
+            <circle cx="91" cy="91" r="7" {...common} />
+            <circle cx="407" cy="210" r="7" {...common} />
+          </>
+        )}
+      </svg>
+      <figcaption className="mono">SYSTEM FIGURE / {name.replaceAll('-', ' ').toUpperCase()}</figcaption>
+    </figure>
+  );
+}
+
+function WorkPlate({ p, i, onInk, ghost }) {
+  return (
+    <li
+      className={`work-plate${ghost ? ' ghosted' : ''}`}
+      data-reveal
+      style={{ '--i': i }}
+      onPointerEnter={(e) => onInk(e.clientX, e.clientY)}
+    >
+      <div className="work-plate-head mono">
+        <span className="work-idx">{String(i + 1).padStart(2, '0')}</span>
+        <span>{p.label.toUpperCase()}</span>
+        <span className="work-type">{p.type.toUpperCase()}</span>
+        <span className="work-status">◆ {p.period}</span>
+      </div>
+      <div className="work-plate-body">
+        <div className="work-copy">
+          <p className="work-intent mono">DESIGN INTENT / {p.highlight}</p>
+          <h3 className="work-headline">{p.headline}</h3>
+          <p className="work-desc">{p.desc}</p>
+          <ul className="tags mono">
+            {p.tech.map((t) => (
+              <li key={t}>{t}</li>
+            ))}
+          </ul>
+          <div className="work-actions mono">
+            <a className="work-live" href={p.href} target="_blank" rel="noreferrer">
+              RUN SYSTEM ↗︎
+            </a>
+            <a href={p.source} target="_blank" rel="noreferrer">
+              INSPECT SOURCE ↗︎
+            </a>
           </div>
         </div>
-      </a>
-      {p.source && p.source !== p.href && (
-        <a className="work-source mono" href={p.source} target="_blank" rel="noreferrer">
-          inspect source ↗
-        </a>
-      )}
+        <ProjectFigure name={p.name} label={p.label} />
+      </div>
     </li>
   );
 }
@@ -390,9 +456,9 @@ export default function App() {
           T·RAMANUJAM<span className="mark-ext"> — SHEET 01</span>
         </span>
         <nav className="topnav mono" aria-label="Sections">
-          <a href="#experience">EXPERIENCE</a>
           <a href="#work">WORK</a>
-          <a href="#skills">SKILLS</a>
+          <a href="#experience">EXPERIENCE</a>
+          <a href="#approach">APPROACH</a>
           <a href="#contact">CONTACT</a>
         </nav>
         <Clock />
@@ -416,8 +482,8 @@ export default function App() {
           </div>
           <div className="hero-grid" data-reveal style={{ '--i': 3 }}>
             <p className="lede">
-              I build <em>AI systems</em>, full-stack products, and open-source tools — LLM
-              pipelines, FastAPI backends, React frontends.
+              I turn ambitious <em>AI ideas</em> into systems people can actually use —
+              designed, shipped, observed, and improved in the real world.
             </p>
             <dl className="meta mono">
               <div>
@@ -463,16 +529,51 @@ export default function App() {
           <div className="ticker-track mono">
             {[0, 1, 2, 3].map((k) => (
               <span key={k}>
-                AI SYSTEMS — FULL-STACK PRODUCTS — OPEN-SOURCE TOOLS — LLM PIPELINES — FASTAPI
-                BACKENDS — REACT FRONTENDS — MULTI-AGENT ORCHESTRATION —&nbsp;
+                FRAME THE PROBLEM — DESIGN THE SYSTEM — SHIP THE PROOF — OBSERVE THE BEHAVIOR —
+                REFINE THE EXPERIENCE —&nbsp;
               </span>
             ))}
           </div>
         </div>
 
+        {/* ---------------------------------------------- manifesto */}
+        <section id="approach" className="section manifesto" aria-label="Design intent">
+          <SectionHead no="02" title="DESIGN INTENT" note="SYSTEMS WITH A POINT OF VIEW" />
+          <div className="manifesto-grid" data-reveal>
+            <p className="manifesto-lead">
+              I build at the point where <em>intelligence</em> becomes an interface.
+            </p>
+            <div className="manifesto-notes">
+              <p>
+                The model is only one component. The real work is making the whole system
+                understandable, dependable, and satisfying to use.
+              </p>
+              <dl className="manifesto-spec mono">
+                <div><dt>01</dt><dd>MAKE COMPLEXITY LEGIBLE</dd></div>
+                <div><dt>02</dt><dd>SHIP INTERACTIVE PROOF</dd></div>
+                <div><dt>03</dt><dd>DESIGN FOR THE FAILURE PATH</dd></div>
+              </dl>
+            </div>
+          </div>
+        </section>
+
+        {/* ---------------------------------------------------- work */}
+        <section id="work" className="section" aria-label="Selected work">
+          <SectionHead
+            no="03"
+            title="SYSTEMS IN OPERATION"
+            note={`${PROJECTS_FEATURED.length} LIVE BUILDS · SOURCE INCLUDED`}
+          />
+          <ol className="works">
+            {PROJECTS_FEATURED.map((p, i) => (
+              <WorkPlate key={p.name} p={p} i={i} onInk={ink} ghost={!matchesSkills(p, selSkills)} />
+            ))}
+          </ol>
+        </section>
+
         {/* ---------------------------------------------- experience */}
         <section id="experience" className="section" aria-label="Experience">
-          <SectionHead no="02" title="EXPERIENCE" note="2021 — PRESENT" />
+          <SectionHead no="04" title="FIELD EXPERIENCE" note="2021 — PRESENT" />
           <div className="xps">
             {EXPERIENCE.map((x, i) => (
               <article className={`xp${matchesSkills(x, selSkills) ? '' : ' ghosted'}`} key={x.company} data-reveal style={{ '--i': i }}>
@@ -497,23 +598,9 @@ export default function App() {
           </div>
         </section>
 
-        {/* ---------------------------------------------------- work */}
-        <section id="work" className="section" aria-label="Selected work">
-          <SectionHead
-            no="03"
-            title="SELECTED WORK"
-            note={`${PROJECTS_FEATURED.length} LIVE BUILDS`}
-          />
-          <ol className="works">
-            {PROJECTS_FEATURED.map((p, i) => (
-              <WorkRow key={p.name} p={p} i={i} onInk={ink} ghost={!matchesSkills(p, selSkills)} />
-            ))}
-          </ol>
-        </section>
-
         {/* -------------------------------------------------- skills */}
         <section id="skills" className="section" aria-label="Skills">
-          <SectionHead no="04" title="SKILLS / PARTS LIST" note="BILL OF MATERIALS" />
+          <SectionHead no="05" title="SKILLS / PARTS LIST" note="BILL OF MATERIALS" />
           <SkillsBoard active={activeSkills} onToggle={toggleSkill} onClear={() => setActiveSkills([])} />
         </section>
 
@@ -579,7 +666,7 @@ export default function App() {
         {/* ------------------------------------------------- archive */}
         <section className="section" aria-label="Project archive">
           <SectionHead
-            no="05"
+            no="06"
             title="ARCHIVE"
             note={`INDEX 06 — ${5 + PROJECTS_MORE.length}`}
           />
@@ -601,7 +688,10 @@ export default function App() {
 
         {/* ------------------------------------------------- contact */}
         <section id="contact" className="section contact" aria-label="Contact">
-          <SectionHead no="06" title="GET IN TOUCH" note="NO FORM. JUST MAIL." />
+          <SectionHead no="07" title="START A CONVERSATION" note="NO FORM. JUST MAIL." />
+          <p className="contact-question" data-reveal>
+            Have a difficult system that needs to become <em>real?</em>
+          </p>
           <a className="mail" href={`mailto:${CONTACT.email}`} data-reveal>
             {CONTACT.email}
           </a>
