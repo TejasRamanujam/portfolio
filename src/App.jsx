@@ -1,723 +1,274 @@
-import { useEffect, useRef, useState } from 'react';
 import { CONTACT, EDUCATION, EXPERIENCE, PROJECTS_FEATURED, PROJECTS_MORE, SKILLS } from './data.js';
-import { createPlotter } from './plotter.js';
 
-const prefersReduced = () =>
-  typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+const projectCtas = {
+  'working-drawing': 'Visit the portfolio',
+  connection: 'Start talking',
+  neuron: 'Search the archive',
+  neurosurge: 'Open the atlas',
+  scribbly: 'Draw together',
+};
 
-/* ---------------------------------------------------------------- clock */
-
-function Clock() {
-  const [now, setNow] = useState('--:--:--');
-  useEffect(() => {
-    const fmt = new Intl.DateTimeFormat('en-US', {
-      timeZone: 'America/Chicago',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-    });
-    const tick = () => setNow(fmt.format(new Date()));
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, []);
-  return (
-    <span className="clock mono" aria-label={`Local time in Richardson, Texas: ${now}`}>
-      RICHARDSON, TX&nbsp;&nbsp;{now} CT
-    </span>
-  );
+function Arrow() {
+  return <span aria-hidden="true">↗</span>;
 }
 
-/* ------------------------------------------------------- kinetic title */
-
-function KineticLine({ text }) {
+function ProjectArtwork({ name, label }) {
   return (
-    <span className="k-line" aria-hidden="true">
-      {text.split('').map((ch, i) => (
-        <span className="k-ch" key={i}>
-          {ch}
-        </span>
-      ))}
-    </span>
-  );
-}
-
-function useKineticTitle(heroRef, enabled) {
-  useEffect(() => {
-    if (!enabled) return;
-    const hero = heroRef.current;
-    if (!hero) return;
-    const chars = Array.from(hero.querySelectorAll('.k-ch'));
-    if (!chars.length) return;
-
-    const state = chars.map(() => ({ w: 72, g: 640 }));
-    let px = -9999;
-    let raf = 0;
-    let active = false;
-    let visible = true;
-
-    const onMove = (e) => {
-      px = e.clientX;
-      active = true;
-    };
-
-    const loop = () => {
-      if (visible) {
-        for (let i = 0; i < chars.length; i++) {
-          const r = chars[i].getBoundingClientRect();
-          const cx = r.left + r.width / 2;
-          const d = Math.abs(px - cx);
-          const f = active ? Math.max(0, 1 - d / 260) : 0;
-          const s = state[i];
-          s.w += (72 + f * 53 - s.w) * 0.14;
-          s.g += (640 + f * 230 - s.g) * 0.14;
-          chars[i].style.fontVariationSettings = `'wdth' ${s.w.toFixed(1)}, 'wght' ${s.g.toFixed(0)}`;
-        }
-      }
-      raf = requestAnimationFrame(loop);
-    };
-
-    const io = new IntersectionObserver(([en]) => {
-      visible = en.isIntersecting;
-    });
-    io.observe(hero);
-    window.addEventListener('pointermove', onMove, { passive: true });
-    raf = requestAnimationFrame(loop);
-    return () => {
-      cancelAnimationFrame(raf);
-      io.disconnect();
-      window.removeEventListener('pointermove', onMove);
-    };
-  }, [enabled, heroRef]);
-}
-
-/* ---------------------------------------------------------- crosshair */
-
-function Crosshair({ enabled }) {
-  const hRef = useRef(null);
-  const vRef = useRef(null);
-  const tagRef = useRef(null);
-  useEffect(() => {
-    if (!enabled) return;
-    let tx = -100;
-    let ty = -100;
-    let x = -100;
-    let y = -100;
-    let seen = false;
-    let raf = 0;
-    const onMove = (e) => {
-      tx = e.clientX;
-      ty = e.clientY;
-      seen = true;
-    };
-    const loop = () => {
-      x += (tx - x) * 0.22;
-      y += (ty - y) * 0.22;
-      if (seen && hRef.current) {
-        hRef.current.style.transform = `translateY(${y}px)`;
-        vRef.current.style.transform = `translateX(${x}px)`;
-        tagRef.current.style.transform = `translate(${x + 14}px, ${y + 14}px)`;
-        tagRef.current.textContent = `X ${String(Math.round(x)).padStart(4, '0')} · Y ${String(
-          Math.round(y),
-        ).padStart(4, '0')}`;
-        hRef.current.parentElement.style.opacity = '1';
-      }
-      raf = requestAnimationFrame(loop);
-    };
-    window.addEventListener('pointermove', onMove, { passive: true });
-    raf = requestAnimationFrame(loop);
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener('pointermove', onMove);
-    };
-  }, [enabled]);
-  if (!enabled) return null;
-  return (
-    <div className="xhair" aria-hidden="true">
-      <div className="xhair-h" ref={hRef} />
-      <div className="xhair-v" ref={vRef} />
-      <div className="xhair-tag mono" ref={tagRef} />
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------ sections */
-
-function SectionHead({ no, title, note }) {
-  return (
-    <header className="sec-head" data-reveal>
-      <span className="sec-no mono">§ {no}</span>
-      <h2 className="sec-title">{title}</h2>
-      <span className="sec-note mono">{note}</span>
-    </header>
-  );
-}
-
-function ProjectFigure({ name, label }) {
-  const common = {
-    fill: 'none',
-    stroke: 'currentColor',
-    strokeWidth: 1.2,
-    vectorEffect: 'non-scaling-stroke',
-  };
-
-  return (
-    <figure className={`project-figure figure-${name}`} aria-label={`${label} system diagram`}>
-      <svg viewBox="0 0 480 300" role="img">
-        <rect className="figure-frame" x="12" y="12" width="456" height="276" rx="2" {...common} />
-        <path className="figure-guide" d="M36 46H444M36 254H444M72 28V272M408 28V272" {...common} />
-
-        {name === 'working-drawing' && (
-          <>
-            <path className="figure-primary" d="M45 224C109 88 154 266 224 128S347 68 436 188" {...common} />
-            <path d="M45 198C120 84 173 230 238 112S360 92 436 160" {...common} />
-            <path d="M45 250C120 120 171 282 246 156S368 96 436 214" {...common} />
-          </>
-        )}
-        {name === 'connection' && (
-          <>
-            <circle className="figure-primary" cx="240" cy="150" r="76" {...common} />
-            <circle cx="240" cy="150" r="48" {...common} />
-            <path d="M45 150H112L130 121L153 187L178 103L204 150H276L300 116L322 179L348 130L370 150H435" {...common} />
-          </>
-        )}
-        {name === 'neuron' && (
-          <>
-            {[0, 1, 2, 3].map((row) =>
-              [0, 1, 2, 3, 4, 5].map((col) => (
-                <rect
-                  key={`${row}-${col}`}
-                  className={row === 1 && col === 3 ? 'figure-primary' : undefined}
-                  x={78 + col * 58}
-                  y={70 + row * 42}
-                  width="36"
-                  height="22"
-                  {...common}
-                />
-              )),
-            )}
-          </>
-        )}
-        {name === 'neurosurge' && (
-          <>
-            <path d="M116 190L186 103L242 157L319 84L374 192L287 229L242 157L151 238L116 190Z" {...common} />
-            {[[116,190],[186,103],[242,157],[319,84],[374,192],[287,229],[151,238]].map(([cx, cy], i) => (
-              <circle key={i} className={i === 2 ? 'figure-primary' : undefined} cx={cx} cy={cy} r={i === 2 ? 15 : 9} {...common} />
-            ))}
-          </>
-        )}
-        {name === 'scribbly' && (
-          <>
-            <path className="figure-primary" d="M67 205C104 62 163 261 213 127S309 80 348 189S399 230 431 99" {...common} />
-            <path d="M91 91L148 65M347 235L407 210" {...common} />
-            <circle cx="91" cy="91" r="7" {...common} />
-            <circle cx="407" cy="210" r="7" {...common} />
-          </>
-        )}
-      </svg>
-      <figcaption className="mono">SYSTEM FIGURE / {name.replaceAll('-', ' ').toUpperCase()}</figcaption>
+    <figure className={`machine-art machine-art--${name}`} aria-label={`${label} visual`}>
+      {name === 'working-drawing' && (
+        <svg viewBox="0 0 620 440" role="img">
+          <path className="art-line art-line--soft" d="M-20 345C112 84 220 478 358 174S548 82 678 276" />
+          <path className="art-line" d="M-20 302C110 54 234 432 362 146S542 48 678 234" />
+          <path className="art-line art-line--accent" d="M-20 390C124 122 238 512 382 204S562 118 678 318" />
+          <circle className="art-dot" cx="388" cy="198" r="13" />
+          <circle className="art-orbit" cx="388" cy="198" r="50" />
+        </svg>
+      )}
+      {name === 'connection' && (
+        <svg viewBox="0 0 620 440" role="img">
+          <circle className="orb orb--outer" cx="310" cy="220" r="142" />
+          <circle className="orb orb--middle" cx="310" cy="220" r="101" />
+          <circle className="orb orb--core" cx="310" cy="220" r="61" />
+          <path className="wave" d="M76 220H148L175 170L211 290L249 134L287 220H335L366 174L401 277L441 190L471 220H544" />
+        </svg>
+      )}
+      {name === 'neuron' && (
+        <div className="archive-stack" aria-hidden="true">
+          <div className="archive-card archive-card--back"><span>24</span></div>
+          <div className="archive-card archive-card--middle"><i /><i /><i /></div>
+          <div className="archive-card archive-card--front">
+            <b>Find your next build</b>
+            <span className="archive-search">Search the archive…</span>
+            <div><i>AI</i><i>Web</i><i>Data</i></div>
+          </div>
+        </div>
+      )}
+      {name === 'neurosurge' && (
+        <svg viewBox="0 0 620 440" role="img">
+          <g className="graph-lines">
+            <path d="M118 279L201 135L305 220L414 102L508 255L382 337L305 220L188 342L118 279Z" />
+            <path d="M201 135L414 102M188 342L382 337M118 279L305 220L508 255" />
+          </g>
+          {[[118,279],[201,135],[305,220],[414,102],[508,255],[382,337],[188,342]].map(([cx, cy], index) => (
+            <circle className={index === 2 ? 'graph-node graph-node--hero' : 'graph-node'} key={`${cx}-${cy}`} cx={cx} cy={cy} r={index === 2 ? 24 : 14} />
+          ))}
+        </svg>
+      )}
+      {name === 'scribbly' && (
+        <svg viewBox="0 0 620 440" role="img">
+          <path className="scribble scribble--one" d="M71 302C129 76 222 383 297 174S444 78 535 274" />
+          <path className="scribble scribble--two" d="M101 113C174 195 198 65 263 119S360 217 418 143S488 113 529 165" />
+          <g className="cursor cursor--one"><path d="M170 245l17 42 9-17 18-8z" /><circle cx="224" cy="267" r="10" /></g>
+          <g className="cursor cursor--two"><path d="M430 108l17 42 9-17 18-8z" /><circle cx="485" cy="130" r="10" /></g>
+        </svg>
+      )}
+      <figcaption>{label}</figcaption>
     </figure>
   );
 }
 
-function WorkPlate({ p, i, onInk, ghost }) {
+function ProjectCard({ project, index }) {
   return (
-    <li
-      className={`work-plate${ghost ? ' ghosted' : ''}`}
-      data-reveal
-      style={{ '--i': i }}
-      onPointerEnter={(e) => onInk(e.clientX, e.clientY)}
-    >
-      <div className="work-plate-head mono">
-        <span className="work-idx">{String(i + 1).padStart(2, '0')}</span>
-        <span>{p.label.toUpperCase()}</span>
-        <span className="work-type">{p.type.toUpperCase()}</span>
-        <span className="work-status">◆ {p.period}</span>
-      </div>
-      <div className="work-plate-body">
-        <div className="work-copy">
-          <p className="work-intent mono">DESIGN INTENT / {p.highlight}</p>
-          <h3 className="work-headline">{p.headline}</h3>
-          <p className="work-desc">{p.desc}</p>
-          <ul className="tags mono">
-            {p.tech.map((t) => (
-              <li key={t}>{t}</li>
-            ))}
-          </ul>
-          <div className="work-actions mono">
-            <a className="work-live" href={p.href} target="_blank" rel="noreferrer">
-              RUN SYSTEM ↗︎
-            </a>
-            <a href={p.source} target="_blank" rel="noreferrer">
-              INSPECT SOURCE ↗︎
-            </a>
-          </div>
+    <article className={`machine machine--${project.name}${index % 2 ? ' machine--reverse' : ''}`}>
+      <ProjectArtwork name={project.name} label={project.label} />
+      <div className="machine-copy">
+        <div className="machine-meta">
+          <span>0{index + 1}</span>
+          <span>{project.type}</span>
+          <span className="live-dot">Live</span>
         </div>
-        <ProjectFigure name={p.name} label={p.label} />
+        <p className="machine-name">{project.label}</p>
+        <h3>{project.headline}</h3>
+        <p className="machine-description">{project.desc}</p>
+        <ul className="machine-tags" aria-label={`${project.label} technologies`}>
+          {project.tech.map((item) => <li key={item}>{item}</li>)}
+        </ul>
+        <div className="machine-actions">
+          <a className="button button--dark" href={project.href} target="_blank" rel="noreferrer">
+            {projectCtas[project.name]} <Arrow />
+          </a>
+          <a className="text-link" href={project.source} target="_blank" rel="noreferrer">
+            View source <Arrow />
+          </a>
+        </div>
       </div>
-    </li>
+    </article>
   );
 }
 
-const norm = (v) => String(v).trim().toLowerCase();
-/* An item is "attached" to a skill when it appears in that skill's
-   curated refs (same href for builds; company prefix for roles). */
-const refHits = (item, sk) =>
-  sk.refs.some((r) => {
-    if (r.href && item.href) return r.href === item.href;
-    if (!r.href && item.company) return norm(r.label).startsWith(norm(item.company.split(' ')[0]));
-    return false;
-  });
-export function matchesSkills(item, selSkills) {
-  if (!selSkills.length) return true;
-  return selSkills.every((sk) => refHits(item, sk));
-}
-
-/* Skills as an interactive parts list: multi-select parts to FILTER the
-   whole sheet (experience + work + archive dim to ghosts), legend plots
-   the selected parts' builds. */
-function SkillsBoard({ active, onToggle, onClear }) {
-  const selected = SKILLS.flatMap((g) => g.items).filter((it) => active.includes(it.name));
-  return (
-    <div className="skills-board">
-      <div className="bom">
-        <p className="bom-filter mono" aria-live="polite">
-          {active.length ? (
-            <>
-              FILTERING SHEET BY {active.length} PART{active.length > 1 ? 'S' : ''} (AND){' '}
-              <button type="button" className="bom-clear mono" onClick={onClear}>
-                × CLEAR
-              </button>
-            </>
-          ) : (
-            'SELECT PARTS TO FILTER THE WHOLE SHEET — EXPERIENCE, WORK & ARCHIVE.'
-          )}
-        </p>
-        {SKILLS.map((g, i) => (
-          <div className="bom-row" key={g.label} data-reveal style={{ '--i': i }}>
-            <span className="bom-label mono">{g.label.toUpperCase()}</span>
-            <div className="bom-chips" role="group" aria-label={`${g.label} skills`}>
-              {g.items.map((it) => (
-                <button
-                  key={it.name}
-                  type="button"
-                  className="chip mono"
-                  aria-pressed={active.includes(it.name)}
-                  onClick={() => onToggle(it.name)}
-                >
-                  {it.name}
-                </button>
-              ))}
-            </div>
-            <span className="bom-qty mono">×{g.items.length}</span>
-          </div>
-        ))}
-      </div>
-      <aside className="legend" aria-live="polite">
-        <p className="legend-head mono">LEGEND</p>
-        {selected.length ? (
-          selected.map((sel) => (
-            <div key={sel.name} className="legend-block">
-              <p className="legend-skill">{sel.name}</p>
-              {sel.refs.length ? (
-                <ul className="legend-refs">
-                  {sel.refs.map((r) => (
-                    <li key={r.label} className="mono">
-                      {r.href ? (
-                        <a href={r.href} target="_blank" rel="noreferrer">{r.label} ↗︎</a>
-                      ) : (
-                        <span>{r.label}</span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="mono legend-empty">NO INDEXED BUILDS ON THIS SHEET.</p>
-              )}
-            </div>
-          ))
-        ) : (
-          <p className="mono legend-empty">CLICK PARTS TO PLOT THEIR BUILDS.</p>
-        )}
-      </aside>
-    </div>
-  );
-}
-
-/* ----------------------------------------------------------------- app */
-
-export default function App() {
-  const reduced = useRef(prefersReduced()).current;
-  const [activeSkills, setActiveSkills] = useState([]);
-  const selSkills = SKILLS.flatMap((g) => g.items).filter((it) => activeSkills.includes(it.name));
-  const toggleSkill = (n) =>
-    setActiveSkills((prev) => (prev.includes(n) ? prev.filter((x) => x !== n) : [...prev, n]));
-  const fine = useRef(
-    typeof matchMedia !== 'undefined' && matchMedia('(pointer: fine)').matches,
-  ).current;
-
-  const canvasRef = useRef(null);
-  const plotterRef = useRef(null);
-  const heroRef = useRef(null);
-
-  useKineticTitle(heroRef, !reduced && fine);
-
-  // Plotter background
-  useEffect(() => {
-    const plotter = createPlotter(canvasRef.current, { reducedMotion: reduced });
-    plotterRef.current = plotter;
-    return () => plotter.destroy();
-  }, [reduced]);
-
-  // Scroll reveals
-  useEffect(() => {
-    const els = Array.from(document.querySelectorAll('[data-reveal]'));
-    if (reduced || !('IntersectionObserver' in window)) {
-      els.forEach((el) => el.classList.add('in'));
-      return;
-    }
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((en) => {
-          if (en.isIntersecting) {
-            en.target.classList.add('in');
-            io.unobserve(en.target);
-          }
-        });
-      },
-      { rootMargin: '0px 0px -8% 0px', threshold: 0.05 },
-    );
-    els.forEach((el) => io.observe(el));
-
-    // Self-healing fallback: browsers can stop delivering IO callbacks after
-    // long idle/sleep, leaving sections invisible. Sweep anything already in
-    // view that never got revealed.
-    const sweep = () => {
-      const vh = window.innerHeight;
-      els.forEach((el) => {
-        if (el.classList.contains('in')) return;
-        const r = el.getBoundingClientRect();
-        if (r.top < vh * 0.96) el.classList.add('in');
-      });
-    };
-    let st = 0;
-    const onScroll = () => {
-      clearTimeout(st);
-      st = setTimeout(sweep, 140);
-    };
-    const onVis = () => {
-      if (!document.hidden) sweep();
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    document.addEventListener('visibilitychange', onVis);
-    const iv = setInterval(sweep, 4000);
-    return () => {
-      io.disconnect();
-      window.removeEventListener('scroll', onScroll);
-      document.removeEventListener('visibilitychange', onVis);
-      clearInterval(iv);
-      clearTimeout(st);
-    };
-  }, [reduced]);
-
-  // Easter egg: G toggles the drafting grid
-  useEffect(() => {
-    const onKey = (e) => {
-      if (
-        e.key.toLowerCase() === 'g' &&
-        !e.metaKey &&
-        !e.ctrlKey &&
-        !e.altKey &&
-        !/^(input|textarea|button|a)$/i.test(e.target.tagName)
-      ) {
-        document.body.classList.toggle('show-grid');
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    // eslint-disable-next-line no-console
-    console.log('%cSHEET 01 — press G to toggle the drafting grid.', 'font-family:monospace');
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
-
-  const ink = (x, y) => plotterRef.current && plotterRef.current.burst(x, y);
-
+function App() {
   return (
     <>
-      <a className="skip mono" href="#main">
-        Skip to content
-      </a>
-      <canvas ref={canvasRef} className="plotter" aria-hidden="true" />
-      <div className="grid-overlay" aria-hidden="true" />
-      <Crosshair enabled={fine && !reduced} />
+      <a className="skip-link" href="#main">Skip to content</a>
 
-      <header className="topbar">
-        <span className="mark mono">
-          T·RAMANUJAM<span className="mark-ext"> — SHEET 01</span>
-        </span>
-        <nav className="topnav mono" aria-label="Sections">
-          <a href="#work">WORK</a>
-          <a href="#experience">EXPERIENCE</a>
-          <a href="#approach">APPROACH</a>
-          <a href="#contact">CONTACT</a>
+      <header className="site-nav">
+        <a className="wordmark" href="#top" aria-label="Tejas Ramanujam, back to top">
+          <span>tejas</span><i>r.</i>
+        </a>
+        <nav aria-label="Primary navigation">
+          <a href="#work">Work</a>
+          <a href="#experience">Experience</a>
+          <a href="#about">About</a>
         </nav>
-        <Clock />
+        <a className="nav-hello" href={`mailto:${CONTACT.email}`}>
+          Say hello <span aria-hidden="true">●</span>
+        </a>
       </header>
 
       <main id="main">
-        {/* ---------------------------------------------------- hero */}
-        <section className="hero" ref={heroRef} aria-label="Introduction">
-          <p className="kicker mono" data-reveal>
-            FIG. 01 — PORTFOLIO OF WORK · SOFTWARE ENGINEER
-          </p>
-          <h1 className="hero-title" data-reveal style={{ '--i': 1 }}>
-            <span className="visually-hidden">Tejas Ramanujam</span>
-            <KineticLine text="TEJAS" />
-            <KineticLine text="RAMANUJAM" />
-          </h1>
-          <div className="dim-line" data-reveal style={{ '--i': 2 }} aria-hidden="true">
-            <span className="dim-tick" />
-            <span className="dim-label mono">DRAWN 2026 · SCALE 1:1</span>
-            <span className="dim-tick" />
-          </div>
-          <div className="hero-grid" data-reveal style={{ '--i': 3 }}>
-            <p className="lede">
-              I turn ambitious <em>AI ideas</em> into systems people can actually use —
-              designed, shipped, observed, and improved in the real world.
+        <section className="hero" id="top" aria-labelledby="hero-title">
+          <div className="hero-copy">
+            <p className="eyebrow"><span>✦</span> Software engineer · systems maker</p>
+            <h1 id="hero-title">I make intelligent systems feel <em>alive.</em></h1>
+            <p className="hero-intro">
+              I’m Tejas—an engineer who turns ambitious AI ideas into thoughtful products people can talk to, explore, and use together.
             </p>
-            <dl className="meta mono">
-              <div>
-                <dt>EDUCATION</dt>
-                <dd>B.S. SOFTWARE ENGINEERING — UT DALLAS &rsquo;27</dd>
-              </div>
-              <div>
-                <dt>MINOR</dt>
-                <dd>{EDUCATION.minor.toUpperCase()}</dd>
-              </div>
-              <div>
-                <dt>GPA</dt>
-                <dd>{EDUCATION.gpa} / 4.00</dd>
-              </div>
-              <div>
-                <dt>COURSEWORK</dt>
-                <dd>{EDUCATION.coursework.join(' · ').toUpperCase()}</dd>
-              </div>
-              <div>
-                <dt>BASED IN</dt>
-                <dd>RICHARDSON, TEXAS</dd>
-              </div>
-            </dl>
-          </div>
-          <div className="hero-cta" data-reveal style={{ '--i': 4 }}>
-            <a className="btn mono" href={CONTACT.github} target="_blank" rel="noreferrer">
-              GITHUB ↗︎
-            </a>
-            <a className="btn mono" href={CONTACT.linkedin} target="_blank" rel="noreferrer">
-              LINKEDIN ↗︎
-            </a>
-            <a className="btn mono" href="/resume.pdf" target="_blank" rel="noreferrer">
-              RESUME ↗︎
-            </a>
-            <a className="btn btn-solid mono" href={`mailto:${CONTACT.email}`}>
-              EMAIL ME
-            </a>
-          </div>
-        </section>
-
-        {/* -------------------------------------------------- ticker */}
-        <div className="ticker" aria-hidden="true">
-          <div className="ticker-track mono">
-            {[0, 1, 2, 3].map((k) => (
-              <span key={k}>
-                FRAME THE PROBLEM — DESIGN THE SYSTEM — SHIP THE PROOF — OBSERVE THE BEHAVIOR —
-                REFINE THE EXPERIENCE —&nbsp;
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* ---------------------------------------------- manifesto */}
-        <section id="approach" className="section manifesto" aria-label="Design intent">
-          <SectionHead no="02" title="DESIGN INTENT" note="SYSTEMS WITH A POINT OF VIEW" />
-          <div className="manifesto-grid" data-reveal>
-            <p className="manifesto-lead">
-              I build at the point where <em>intelligence</em> becomes an interface.
-            </p>
-            <div className="manifesto-notes">
-              <p>
-                The model is only one component. The real work is making the whole system
-                understandable, dependable, and satisfying to use.
-              </p>
-              <dl className="manifesto-spec mono">
-                <div><dt>01</dt><dd>MAKE COMPLEXITY LEGIBLE</dd></div>
-                <div><dt>02</dt><dd>SHIP INTERACTIVE PROOF</dd></div>
-                <div><dt>03</dt><dd>DESIGN FOR THE FAILURE PATH</dd></div>
-              </dl>
+            <div className="hero-actions">
+              <a className="button button--coral" href="#work">Meet the machines <span aria-hidden="true">↓</span></a>
+              <a className="text-link text-link--light" href="/resume.pdf" target="_blank" rel="noreferrer">Résumé <Arrow /></a>
+            </div>
+            <div className="hero-availability">
+              <span className="pulse" aria-hidden="true" />
+              <span>Building in Richardson, Texas</span>
             </div>
           </div>
+
+          <div className="hero-art-wrap">
+            <div className="hero-art-halo" aria-hidden="true" />
+            <img
+              className="hero-art"
+              src="/images/midnight-workshop-hero.webp"
+              alt="A clay-style robot tending five small software machines in a midnight observatory workshop"
+              width="1616"
+              height="977"
+              fetchPriority="high"
+            />
+            <span className="orbit-label orbit-label--one">AI</span>
+            <span className="orbit-label orbit-label--two">VOICE</span>
+            <span className="orbit-label orbit-label--three">CANVAS</span>
+          </div>
         </section>
 
-        {/* ---------------------------------------------------- work */}
-        <section id="work" className="section" aria-label="Selected work">
-          <SectionHead
-            no="03"
-            title="SYSTEMS IN OPERATION"
-            note={`${PROJECTS_FEATURED.length} LIVE BUILDS · SOURCE INCLUDED`}
-          />
-          <ol className="works">
-            {PROJECTS_FEATURED.map((p, i) => (
-              <WorkPlate key={p.name} p={p} i={i} onInk={ink} ghost={!matchesSkills(p, selSkills)} />
+        <section className="story" id="about" aria-labelledby="story-title">
+          <div className="section-kicker">01 · A small thesis</div>
+          <div className="story-grid">
+            <h2 id="story-title">Software should do more than work. It should invite you <em>in.</em></h2>
+            <div className="story-copy">
+              <p>
+                From a voice assistant that shows its reasoning to a whiteboard that remembers every stroke, I care about the moment a complicated system becomes clear, useful, and a little delightful.
+              </p>
+              <p>
+                I work across the stack—AI pipelines, APIs, interfaces, infrastructure—and stay close enough to the product to feel where it can be better.
+              </p>
+            </div>
+          </div>
+          <dl className="story-stats">
+            <div><dt>5</dt><dd>live systems</dd></div>
+            <div><dt>600+</dt><dd>devices automated</dd></div>
+            <div><dt>{EDUCATION.gpa}</dt><dd>UT Dallas GPA</dd></div>
+            <div><dt>’27</dt><dd>software engineering</dd></div>
+          </dl>
+        </section>
+
+        <section className="work" id="work" aria-labelledby="work-title">
+          <div className="work-heading">
+            <div>
+              <p className="section-kicker section-kicker--light">02 · Selected work</p>
+              <h2 id="work-title">Five <em>living</em> machines.</h2>
+            </div>
+            <p>Not mockups. Not screenshots. Five pieces of software you can use right now.</p>
+          </div>
+          <div className="machines">
+            {PROJECTS_FEATURED.map((project, index) => (
+              <ProjectCard project={project} index={index} key={project.name} />
             ))}
-          </ol>
+          </div>
+          <a className="catalogue-link" href={CONTACT.demos} target="_blank" rel="noreferrer">
+            <span>Enter the complete live catalogue</span>
+            <small>Draw on it · search it · talk to it</small>
+            <Arrow />
+          </a>
         </section>
 
-        {/* ---------------------------------------------- experience */}
-        <section id="experience" className="section" aria-label="Experience">
-          <SectionHead no="04" title="FIELD EXPERIENCE" note="2021 — PRESENT" />
-          <div className="xps">
-            {EXPERIENCE.map((x, i) => (
-              <article className={`xp${matchesSkills(x, selSkills) ? '' : ' ghosted'}`} key={x.company} data-reveal style={{ '--i': i }}>
-                <h3 className="xp-role">
-                  {x.role} <span className="xp-co">— {x.company}</span>
-                </h3>
-                <div className="xp-when mono">
-                  {x.period.toUpperCase()} · {x.location.toUpperCase()}
+        <section className="experience" id="experience" aria-labelledby="experience-title">
+          <div className="experience-intro">
+            <p className="section-kicker">03 · Along the way</p>
+            <h2 id="experience-title">Field notes from the <em>real world.</em></h2>
+            <p>I like shipping software where the constraints are real, the users are waiting, and the results can be measured.</p>
+            <a className="text-link" href="/resume.pdf" target="_blank" rel="noreferrer">Download the full résumé <Arrow /></a>
+          </div>
+          <div className="timeline">
+            {EXPERIENCE.map((item, index) => (
+              <article className="timeline-item" key={item.company}>
+                <span className="timeline-no">0{index + 1}</span>
+                <div>
+                  <p className="timeline-period">{item.period} · {item.location}</p>
+                  <h3>{item.role}</h3>
+                  <p className="timeline-company">{item.company}</p>
+                  <p className="timeline-result">{item.bullets[0]}</p>
+                  <ul>{item.tags.slice(0, 4).map((tag) => <li key={tag}>{tag}</li>)}</ul>
                 </div>
-                <ul className="xp-bullets">
-                  {x.bullets.map((b) => (
-                    <li key={b}>{b}</li>
-                  ))}
-                </ul>
-                <ul className="tags mono">
-                  {x.tags.map((t) => (
-                    <li key={t}>{t}</li>
-                  ))}
-                </ul>
               </article>
             ))}
           </div>
         </section>
 
-        {/* -------------------------------------------------- skills */}
-        <section id="skills" className="section" aria-label="Skills">
-          <SectionHead no="05" title="SKILLS / PARTS LIST" note="BILL OF MATERIALS" />
-          <SkillsBoard active={activeSkills} onToggle={toggleSkill} onClear={() => setActiveSkills([])} />
+        <section className="toolkit" aria-labelledby="toolkit-title">
+          <div className="toolkit-heading">
+            <p className="section-kicker section-kicker--light">04 · The parts shelf</p>
+            <h2 id="toolkit-title">Tools I reach for.</h2>
+            <p>The technology changes. The goal stays the same: make the system understandable and make the experience feel considered.</p>
+          </div>
+          <div className="tool-shelves">
+            {SKILLS.map((group, index) => (
+              <article className={`tool-shelf tool-shelf--${index + 1}`} key={group.label}>
+                <span>0{index + 1}</span>
+                <h3>{group.label}</h3>
+                <ul>{group.items.map((item) => <li key={item.name}>{item.name}</li>)}</ul>
+              </article>
+            ))}
+          </div>
         </section>
 
-        {/* --------------------------------- sheet 02 cross-reference */}
-        <section className="section sheetref-wrap" aria-label="Live demos catalogue">
-          <a
-            className="sheetref"
-            href="https://tejas-live-demos.vercel.app"
-            target="_blank"
-            rel="noreferrer"
-            data-reveal
-          >
-            <div className="sheetref-body">
-              <p className="mono sheetref-note">SEE DETAIL → SHEET 02 · INDEX OF LIVE SOFTWARE</p>
-              <p className="sheetref-title">
-                Five <em>living</em> machines
-              </p>
-              <p className="sheetref-sub">
-                Every build above, running right now in one catalogue — draw on it, search it,
-                talk to it.
-              </p>
-              <span className="mono sheetref-cta">OPEN THE CATALOGUE ↗︎</span>
-            </div>
-            <svg
-              className="sheetref-fig"
-              viewBox="0 0 180 130"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <rect x="6" y="6" width="168" height="118" fill="none" stroke="currentColor" strokeWidth="1.4" />
-              <rect x="14" y="14" width="152" height="102" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3 3" />
-              {[0, 1, 2, 3, 4].map((i) => (
-                <g key={i}>
-                  <rect
-                    x={26 + i * 26}
-                    y={38 - (i % 2) * 10}
-                    width="20"
-                    height="20"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.1"
-                    className="sheetref-plate"
-                    style={{ animationDelay: `${i * 0.35}s` }}
-                  />
-                  <line
-                    x1={36 + i * 26}
-                    y1={58 - (i % 2) * 10 + 1}
-                    x2={36 + i * 26}
-                    y2="92"
-                    stroke="currentColor"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 3"
-                  />
-                  <text x={32 + i * 26} y="104" className="sheetref-no">
-                    0{i + 1}
-                  </text>
-                </g>
-              ))}
-            </svg>
-          </a>
-        </section>
-
-        {/* ------------------------------------------------- archive */}
-        <section className="section" aria-label="Project archive">
-          <SectionHead
-            no="06"
-            title="ARCHIVE"
-            note={`INDEX 06 — ${5 + PROJECTS_MORE.length}`}
-          />
-          <ul className="arch">
-            {PROJECTS_MORE.map((p, i) => (
-              <li key={p.name} className={matchesSkills(p, selSkills) ? undefined : 'ghosted'} data-reveal style={{ '--i': i % 4 }}>
-                <a className="arch-link" href={p.href} target="_blank" rel="noreferrer">
-                  <span className="arch-idx mono">{String(i + 6).padStart(2, '0')}</span>
-                  <span className="arch-name">{p.label}</span>
-                  <span className="arch-tech mono">{p.tech}</span>
-                  <span className="arch-arrow" aria-hidden="true">
-                    ↗︎
-                  </span>
+        <section className="archive" aria-labelledby="archive-title">
+          <div>
+            <p className="section-kicker">05 · More experiments</p>
+            <h2 id="archive-title">The workbench is rarely empty.</h2>
+          </div>
+          <ol>
+            {PROJECTS_MORE.map((project, index) => (
+              <li key={project.name}>
+                <a href={project.href} target="_blank" rel="noreferrer">
+                  <span>{String(index + 6).padStart(2, '0')}</span>
+                  <strong>{project.label}</strong>
+                  <small>{project.tech}</small>
+                  <Arrow />
                 </a>
               </li>
             ))}
-          </ul>
+          </ol>
         </section>
 
-        {/* ------------------------------------------------- contact */}
-        <section id="contact" className="section contact" aria-label="Contact">
-          <SectionHead no="07" title="START A CONVERSATION" note="NO FORM. JUST MAIL." />
-          <p className="contact-question" data-reveal>
-            Have a difficult system that needs to become <em>real?</em>
-          </p>
-          <a className="mail" href={`mailto:${CONTACT.email}`} data-reveal>
-            {CONTACT.email}
-          </a>
-          <div className="contact-links mono" data-reveal style={{ '--i': 1 }}>
-            <a href={`tel:+1${CONTACT.phone.replace(/-/g, '')}`}>{CONTACT.phone}</a>
-            <a href={CONTACT.github} target="_blank" rel="noreferrer">
-              GITHUB ↗︎
-            </a>
-            <a href={CONTACT.linkedin} target="_blank" rel="noreferrer">
-              LINKEDIN ↗︎
-            </a>
-            <a href={CONTACT.demos}>ALL DEMOS ↗︎</a>
-            <a href="/resume.pdf" target="_blank" rel="noreferrer">
-              RESUME ↗︎
-            </a>
+        <section className="contact" id="contact" aria-labelledby="contact-title">
+          <p className="section-kicker">06 · The door is open</p>
+          <h2 id="contact-title">Let’s make something unexpectedly <em>useful.</em></h2>
+          <p>Have an ambitious product, an unruly system, or simply a good question?</p>
+          <a className="contact-email" href={`mailto:${CONTACT.email}`}>{CONTACT.email} <Arrow /></a>
+          <div className="contact-links">
+            <a href={CONTACT.github} target="_blank" rel="noreferrer">GitHub <Arrow /></a>
+            <a href={CONTACT.linkedin} target="_blank" rel="noreferrer">LinkedIn <Arrow /></a>
+            <a href={CONTACT.demos} target="_blank" rel="noreferrer">Live demos <Arrow /></a>
+            <a href="/resume.pdf" target="_blank" rel="noreferrer">Résumé <Arrow /></a>
           </div>
         </section>
       </main>
 
-      <footer className="footer">
-        <p className="mono">
-          © 2026 TEJAS RAMANUJAM — SET IN ARCHIVO &amp; FRAGMENT MONO. BACKGROUND PLOTTED LIVE BY A
-          FLOW-FIELD PEN. BUILT WITH REACT + VITE.
-        </p>
-        <p className="mono footer-hint">PRESS “G” TO TOGGLE THE DRAFTING GRID.</p>
+      <footer>
+        <span>© 2026 Tejas Ramanujam</span>
+        <span>Designed and built with curiosity.</span>
       </footer>
     </>
   );
 }
+
+export default App;
