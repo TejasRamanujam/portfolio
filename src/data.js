@@ -69,12 +69,12 @@ export const EXPERIENCE = [
 export const PROJECTS_FEATURED = [
   {
     name: 'working-drawing',
-    label: 'Field Guide — This Site',
+    label: 'Living Systems — This Site',
     type: 'Portfolio',
-    headline: 'A portfolio where the projects feel alive.',
-    highlight: 'YOU ARE HERE — FIVE SPECIMENS AWAKE',
-    tech: ['React', 'Vite', 'Original Art', 'Responsive UI'],
-    desc: 'A pastel field guide where five live systems become curious illustrated specimens — each open to use and inspect.',
+    headline: 'A portfolio connected by one living signal.',
+    highlight: 'YOU ARE HERE — FIELD STATION ONLINE',
+    tech: ['React', 'Vite', 'SVG Motion', 'Original Art'],
+    desc: 'An editorial field station that turns five products into connected instruments—each with its own responsive visual language.',
     href: 'https://tejasramanujam.vercel.app',
     source: `${GH}/portfolio`,
     period: 'LIVE',
