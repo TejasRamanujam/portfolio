@@ -185,6 +185,11 @@ function WorkRow({ p, i, onInk, ghost }) {
           </div>
         </div>
       </a>
+      {p.source && p.source !== p.href && (
+        <a className="work-source mono" href={p.source} target="_blank" rel="noreferrer">
+          inspect source ↗
+        </a>
+      )}
     </li>
   );
 }
