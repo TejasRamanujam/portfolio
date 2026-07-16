@@ -1,94 +1,60 @@
 import { CONTACT, EDUCATION, EXPERIENCE, PROJECTS_FEATURED, PROJECTS_MORE, SKILLS } from './data.js';
 
+const projectScenes = {
+  'working-drawing': '/images/field-guide-portfolio.webp',
+  connection: '/images/field-guide-connection.webp',
+  neuron: '/images/field-guide-neuron.webp',
+  neurosurge: '/images/field-guide-neurosurge.webp',
+  scribbly: '/images/field-guide-scribbly.webp',
+};
+
 const projectCtas = {
-  'working-drawing': 'Visit the portfolio',
+  'working-drawing': 'Explore this field guide',
   connection: 'Start talking',
   neuron: 'Search the archive',
   neurosurge: 'Open the atlas',
   scribbly: 'Draw together',
 };
 
+const projectAlts = {
+  'working-drawing': 'A small cream-colored spirit drawing a flowing path of petals and stars across an unfurling paper sheet',
+  connection: 'Two small spirits communicating through a flower-shaped speaking trumpet beneath cherry blossoms',
+  neuron: 'A small spirit organizing illustrated project cards inside a cabinet built into a flowering tree',
+  neurosurge: 'A small spirit reading beneath a glowing network of linked notes, flowers, and petals',
+  scribbly: 'Two small spirits drawing together with pink and blue crayons on one shared sheet',
+};
+
 function Arrow() {
   return <span aria-hidden="true">↗</span>;
 }
 
-function ProjectArtwork({ name, label }) {
+function ProjectSpecimen({ project, index }) {
   return (
-    <figure className={`machine-art machine-art--${name}`} aria-label={`${label} visual`}>
-      {name === 'working-drawing' && (
-        <svg viewBox="0 0 620 440" role="img">
-          <path className="art-line art-line--soft" d="M-20 345C112 84 220 478 358 174S548 82 678 276" />
-          <path className="art-line" d="M-20 302C110 54 234 432 362 146S542 48 678 234" />
-          <path className="art-line art-line--accent" d="M-20 390C124 122 238 512 382 204S562 118 678 318" />
-          <circle className="art-dot" cx="388" cy="198" r="13" />
-          <circle className="art-orbit" cx="388" cy="198" r="50" />
-        </svg>
-      )}
-      {name === 'connection' && (
-        <svg viewBox="0 0 620 440" role="img">
-          <circle className="orb orb--outer" cx="310" cy="220" r="142" />
-          <circle className="orb orb--middle" cx="310" cy="220" r="101" />
-          <circle className="orb orb--core" cx="310" cy="220" r="61" />
-          <path className="wave" d="M76 220H148L175 170L211 290L249 134L287 220H335L366 174L401 277L441 190L471 220H544" />
-        </svg>
-      )}
-      {name === 'neuron' && (
-        <div className="archive-stack" aria-hidden="true">
-          <div className="archive-card archive-card--back"><span>24</span></div>
-          <div className="archive-card archive-card--middle"><i /><i /><i /></div>
-          <div className="archive-card archive-card--front">
-            <b>Find your next build</b>
-            <span className="archive-search">Search the archive…</span>
-            <div><i>AI</i><i>Web</i><i>Data</i></div>
-          </div>
-        </div>
-      )}
-      {name === 'neurosurge' && (
-        <svg viewBox="0 0 620 440" role="img">
-          <g className="graph-lines">
-            <path d="M118 279L201 135L305 220L414 102L508 255L382 337L305 220L188 342L118 279Z" />
-            <path d="M201 135L414 102M188 342L382 337M118 279L305 220L508 255" />
-          </g>
-          {[[118,279],[201,135],[305,220],[414,102],[508,255],[382,337],[188,342]].map(([cx, cy], index) => (
-            <circle className={index === 2 ? 'graph-node graph-node--hero' : 'graph-node'} key={`${cx}-${cy}`} cx={cx} cy={cy} r={index === 2 ? 24 : 14} />
-          ))}
-        </svg>
-      )}
-      {name === 'scribbly' && (
-        <svg viewBox="0 0 620 440" role="img">
-          <path className="scribble scribble--one" d="M71 302C129 76 222 383 297 174S444 78 535 274" />
-          <path className="scribble scribble--two" d="M101 113C174 195 198 65 263 119S360 217 418 143S488 113 529 165" />
-          <g className="cursor cursor--one"><path d="M170 245l17 42 9-17 18-8z" /><circle cx="224" cy="267" r="10" /></g>
-          <g className="cursor cursor--two"><path d="M430 108l17 42 9-17 18-8z" /><circle cx="485" cy="130" r="10" /></g>
-        </svg>
-      )}
-      <figcaption>{label}</figcaption>
-    </figure>
-  );
-}
-
-function ProjectCard({ project, index }) {
-  return (
-    <article className={`machine machine--${project.name}${index % 2 ? ' machine--reverse' : ''}`}>
-      <ProjectArtwork name={project.name} label={project.label} />
-      <div className="machine-copy">
-        <div className="machine-meta">
-          <span>0{index + 1}</span>
-          <span>{project.type}</span>
-          <span className="live-dot">Live</span>
-        </div>
-        <p className="machine-name">{project.label}</p>
+    <article className={`specimen${index % 2 ? ' specimen--reverse' : ''}`}>
+      <div className="specimen-art">
+        <img
+          src={projectScenes[project.name]}
+          alt={projectAlts[project.name]}
+          width="1254"
+          height="1254"
+          loading="lazy"
+        />
+        <span className="specimen-figure">fig. {String(index + 1).padStart(2, '0')}</span>
+      </div>
+      <div className="specimen-copy">
+        <p className="specimen-label">Specimen {String(index + 1).padStart(2, '0')} · {project.type} <i>● live</i></p>
+        <p className="specimen-name">{project.label}</p>
         <h3>{project.headline}</h3>
-        <p className="machine-description">{project.desc}</p>
-        <ul className="machine-tags" aria-label={`${project.label} technologies`}>
-          {project.tech.map((item) => <li key={item}>{item}</li>)}
+        <p className="specimen-description">{project.desc}</p>
+        <ul className="specimen-tags" aria-label={`${project.label} technologies`}>
+          {project.tech.map((tech) => <li key={tech}>{tech}</li>)}
         </ul>
-        <div className="machine-actions">
-          <a className="button button--dark" href={project.href} target="_blank" rel="noreferrer">
+        <div className="specimen-actions">
+          <a className="button button--brown" href={project.href} target="_blank" rel="noreferrer">
             {projectCtas[project.name]} <Arrow />
           </a>
-          <a className="text-link" href={project.source} target="_blank" rel="noreferrer">
-            View source <Arrow />
+          <a className="soft-link" href={project.source} target="_blank" rel="noreferrer">
+            inspect source <Arrow />
           </a>
         </div>
       </div>
@@ -96,74 +62,63 @@ function ProjectCard({ project, index }) {
   );
 }
 
-function App() {
+export default function App() {
   return (
     <>
       <a className="skip-link" href="#main">Skip to content</a>
 
-      <header className="site-nav">
-        <a className="wordmark" href="#top" aria-label="Tejas Ramanujam, back to top">
-          <span>tejas</span><i>r.</i>
-        </a>
+      <header className="site-header">
+        <a className="brand" href="#top" aria-label="Tejas Ramanujam, back to top">tejas<span>✿</span></a>
         <nav aria-label="Primary navigation">
-          <a href="#work">Work</a>
-          <a href="#experience">Experience</a>
-          <a href="#about">About</a>
+          <a href="#about">about</a>
+          <a href="#work">work</a>
+          <a href="#experience">experience</a>
         </nav>
-        <a className="nav-hello" href={`mailto:${CONTACT.email}`}>
-          Say hello <span aria-hidden="true">●</span>
-        </a>
+        <a className="hello-link" href={`mailto:${CONTACT.email}`}><i /> say hello</a>
       </header>
 
       <main id="main">
         <section className="hero" id="top" aria-labelledby="hero-title">
+          <img
+            className="hero-scene"
+            src="/images/field-guide-hero.webp"
+            alt="Five small software spirits exploring voice, archives, connected notes, drawing, and code beneath a blossoming tree"
+            width="1672"
+            height="941"
+            fetchpriority="high"
+          />
           <div className="hero-copy">
-            <p className="eyebrow"><span>✦</span> Software engineer · systems maker</p>
-            <h1 id="hero-title">I make intelligent systems feel <em>alive.</em></h1>
+            <p className="eyebrow">✦ software engineering · AI · full stack</p>
+            <h1 id="hero-title">A field guide to <em>living software.</em></h1>
             <p className="hero-intro">
-              I’m Tejas—an engineer who turns ambitious AI ideas into thoughtful products people can talk to, explore, and use together.
+              Hi, I’m Tejas. I build thoughtful AI systems and full-stack products—and give the complicated parts enough care that people actually want to use them.
             </p>
             <div className="hero-actions">
-              <a className="button button--coral" href="#work">Meet the machines <span aria-hidden="true">↓</span></a>
-              <a className="text-link text-link--light" href="/resume.pdf" target="_blank" rel="noreferrer">Résumé <Arrow /></a>
+              <a className="button button--pink" href="#work">Meet the specimens <span aria-hidden="true">↓</span></a>
+              <a className="soft-link" href="/resume.pdf" target="_blank" rel="noreferrer">résumé <Arrow /></a>
             </div>
-            <div className="hero-availability">
-              <span className="pulse" aria-hidden="true" />
-              <span>Building in Richardson, Texas</span>
-            </div>
+            <p className="hero-note"><span>5</span> curious systems, awake and running</p>
           </div>
-
-          <div className="hero-art-wrap">
-            <div className="hero-art-halo" aria-hidden="true" />
-            <img
-              className="hero-art"
-              src="/images/midnight-workshop-hero.webp"
-              alt="A clay-style robot tending five small software machines in a midnight observatory workshop"
-              width="1616"
-              height="977"
-              fetchPriority="high"
-            />
-            <span className="orbit-label orbit-label--one">AI</span>
-            <span className="orbit-label orbit-label--two">VOICE</span>
-            <span className="orbit-label orbit-label--three">CANVAS</span>
-          </div>
+          <div className="petal petal--one" aria-hidden="true" />
+          <div className="petal petal--two" aria-hidden="true" />
+          <div className="petal petal--three" aria-hidden="true" />
         </section>
 
-        <section className="story" id="about" aria-labelledby="story-title">
-          <div className="section-kicker">01 · A small thesis</div>
-          <div className="story-grid">
-            <h2 id="story-title">Software should do more than work. It should invite you <em>in.</em></h2>
-            <div className="story-copy">
+        <section className="about" id="about" aria-labelledby="about-title">
+          <p className="section-label">01 / a small philosophy</p>
+          <div className="about-grid">
+            <h2 id="about-title">Useful can still feel <em>wonderful.</em></h2>
+            <div className="about-copy">
               <p>
-                From a voice assistant that shows its reasoning to a whiteboard that remembers every stroke, I care about the moment a complicated system becomes clear, useful, and a little delightful.
+                I’m interested in the tender little moment when a hard technical system stops feeling hard: when an AI explains what it did, an archive helps you find the right idea, or a shared canvas simply remembers.
               </p>
               <p>
-                I work across the stack—AI pipelines, APIs, interfaces, infrastructure—and stay close enough to the product to feel where it can be better.
+                So I work across the stack—models, APIs, interfaces, infrastructure—and keep asking the same question: <strong>could this feel better?</strong>
               </p>
             </div>
           </div>
-          <dl className="story-stats">
-            <div><dt>5</dt><dd>live systems</dd></div>
+          <dl className="stats">
+            <div><dt>5</dt><dd>live builds</dd></div>
             <div><dt>600+</dt><dd>devices automated</dd></div>
             <div><dt>{EDUCATION.gpa}</dt><dd>UT Dallas GPA</dd></div>
             <div><dt>’27</dt><dd>software engineering</dd></div>
@@ -171,42 +126,39 @@ function App() {
         </section>
 
         <section className="work" id="work" aria-labelledby="work-title">
-          <div className="work-heading">
-            <div>
-              <p className="section-kicker section-kicker--light">02 · Selected work</p>
-              <h2 id="work-title">Five <em>living</em> machines.</h2>
-            </div>
-            <p>Not mockups. Not screenshots. Five pieces of software you can use right now.</p>
+          <div className="work-intro">
+            <p className="section-label">02 / selected work</p>
+            <h2 id="work-title">Five <em>living machines.</em></h2>
+            <p>Each one has its own temperament. Every one is real software you can open, use, and inspect.</p>
           </div>
-          <div className="machines">
+          <div className="specimens">
             {PROJECTS_FEATURED.map((project, index) => (
-              <ProjectCard project={project} index={index} key={project.name} />
+              <ProjectSpecimen project={project} index={index} key={project.name} />
             ))}
           </div>
-          <a className="catalogue-link" href={CONTACT.demos} target="_blank" rel="noreferrer">
-            <span>Enter the complete live catalogue</span>
-            <small>Draw on it · search it · talk to it</small>
+          <a className="catalogue" href={CONTACT.demos} target="_blank" rel="noreferrer">
+            <span><small>the complete specimen index</small>Enter the live-software catalogue</span>
+            <strong>draw on it · search it · talk to it</strong>
             <Arrow />
           </a>
         </section>
 
         <section className="experience" id="experience" aria-labelledby="experience-title">
-          <div className="experience-intro">
-            <p className="section-kicker">03 · Along the way</p>
-            <h2 id="experience-title">Field notes from the <em>real world.</em></h2>
-            <p>I like shipping software where the constraints are real, the users are waiting, and the results can be measured.</p>
-            <a className="text-link" href="/resume.pdf" target="_blank" rel="noreferrer">Download the full résumé <Arrow /></a>
+          <div className="experience-heading">
+            <p className="section-label">03 / where the work met the world</p>
+            <h2 id="experience-title">A few places I’ve made things <em>real.</em></h2>
+            <p>Production constraints, waiting users, measurable results—the useful kind of pressure.</p>
+            <a className="soft-link" href="/resume.pdf" target="_blank" rel="noreferrer">download the full résumé <Arrow /></a>
           </div>
-          <div className="timeline">
+          <div className="experience-list">
             {EXPERIENCE.map((item, index) => (
-              <article className="timeline-item" key={item.company}>
-                <span className="timeline-no">0{index + 1}</span>
+              <article key={item.company}>
+                <span className="experience-number">0{index + 1}</span>
                 <div>
-                  <p className="timeline-period">{item.period} · {item.location}</p>
+                  <p className="experience-date">{item.period} · {item.location}</p>
                   <h3>{item.role}</h3>
-                  <p className="timeline-company">{item.company}</p>
-                  <p className="timeline-result">{item.bullets[0]}</p>
-                  <ul>{item.tags.slice(0, 4).map((tag) => <li key={tag}>{tag}</li>)}</ul>
+                  <p className="experience-company">{item.company}</p>
+                  <p className="experience-result">{item.bullets[0]}</p>
                 </div>
               </article>
             ))}
@@ -215,13 +167,12 @@ function App() {
 
         <section className="toolkit" aria-labelledby="toolkit-title">
           <div className="toolkit-heading">
-            <p className="section-kicker section-kicker--light">04 · The parts shelf</p>
-            <h2 id="toolkit-title">Tools I reach for.</h2>
-            <p>The technology changes. The goal stays the same: make the system understandable and make the experience feel considered.</p>
+            <p className="section-label">04 / things in my pockets</p>
+            <h2 id="toolkit-title">The tools change. The care <em>doesn’t.</em></h2>
           </div>
-          <div className="tool-shelves">
+          <div className="tool-groups">
             {SKILLS.map((group, index) => (
-              <article className={`tool-shelf tool-shelf--${index + 1}`} key={group.label}>
+              <article key={group.label} className={`tool-group tool-group--${index + 1}`}>
                 <span>0{index + 1}</span>
                 <h3>{group.label}</h3>
                 <ul>{group.items.map((item) => <li key={item.name}>{item.name}</li>)}</ul>
@@ -231,9 +182,9 @@ function App() {
         </section>
 
         <section className="archive" aria-labelledby="archive-title">
-          <div>
-            <p className="section-kicker">05 · More experiments</p>
-            <h2 id="archive-title">The workbench is rarely empty.</h2>
+          <div className="archive-heading">
+            <p className="section-label">05 / more from the notebook</p>
+            <h2 id="archive-title">The side paths are often <em>interesting.</em></h2>
           </div>
           <ol>
             {PROJECTS_MORE.map((project, index) => (
@@ -249,10 +200,11 @@ function App() {
           </ol>
         </section>
 
-        <section className="contact" id="contact" aria-labelledby="contact-title">
-          <p className="section-kicker">06 · The door is open</p>
-          <h2 id="contact-title">Let’s make something unexpectedly <em>useful.</em></h2>
-          <p>Have an ambitious product, an unruly system, or simply a good question?</p>
+        <section className="contact" aria-labelledby="contact-title">
+          <div className="contact-flower" aria-hidden="true">✿</div>
+          <p className="section-label">06 / the gate is open</p>
+          <h2 id="contact-title">Have something curious in <em>mind?</em></h2>
+          <p>I’m always happy to talk about ambitious products, strange systems, or a good idea that deserves to become real.</p>
           <a className="contact-email" href={`mailto:${CONTACT.email}`}>{CONTACT.email} <Arrow /></a>
           <div className="contact-links">
             <a href={CONTACT.github} target="_blank" rel="noreferrer">GitHub <Arrow /></a>
@@ -265,10 +217,8 @@ function App() {
 
       <footer>
         <span>© 2026 Tejas Ramanujam</span>
-        <span>Designed and built with curiosity.</span>
+        <span>drawn with curiosity · built with care</span>
       </footer>
     </>
   );
 }
-
-export default App;

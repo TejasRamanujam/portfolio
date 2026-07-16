@@ -69,12 +69,12 @@ export const EXPERIENCE = [
 export const PROJECTS_FEATURED = [
   {
     name: 'working-drawing',
-    label: 'The Midnight Workshop — This Site',
+    label: 'Field Guide — This Site',
     type: 'Portfolio',
-    headline: 'A portfolio staged as a midnight workshop.',
-    highlight: 'YOU ARE HERE — FIVE MACHINES ONLINE',
-    tech: ['React', 'Vite', 'Original Art', 'CSS Motion'],
-    desc: 'A story-led portfolio where five live systems become curious machines — pairing original art, editorial motion, and source proof.',
+    headline: 'A portfolio where the projects feel alive.',
+    highlight: 'YOU ARE HERE — FIVE SPECIMENS AWAKE',
+    tech: ['React', 'Vite', 'Original Art', 'Responsive UI'],
+    desc: 'A pastel field guide where five live systems become curious illustrated specimens — each open to use and inspect.',
     href: 'https://tejasramanujam.vercel.app',
     source: `${GH}/portfolio`,
     period: 'LIVE',
