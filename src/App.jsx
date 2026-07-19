@@ -1,9 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { CONTACT, EDUCATION, EXPERIENCE, PROJECTS_FEATURED, PROJECTS_MORE, SKILLS } from './data.js';
 import { createPlotter } from './plotter.js';
+import { CaseStudySheet, CommandPalette, CopyEmail, ScrollRail } from './OverlayUI.jsx';
 
-const prefersReduced = () =>
-  typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+function useMedia(query) {
+  const [matches, setMatches] = useState(() => typeof matchMedia !== 'undefined' && matchMedia(query).matches);
+  useEffect(() => {
+    const media = matchMedia(query);
+    const update = () => setMatches(media.matches);
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, [query]);
+  return matches;
+}
 
 /* ---------------------------------------------------------------- clock */
 
@@ -154,14 +163,13 @@ function SectionHead({ no, title, note }) {
   );
 }
 
-function WorkRow({ p, i, onInk, ghost }) {
+function WorkRow({ p, i, onInk, ghost, onOpen }) {
   return (
     <li className={`work-row${ghost ? ' ghosted' : ''}`} data-reveal style={{ '--i': i }}>
-      <a
+      <button
+        type="button"
         className="work-link"
-        href={p.href}
-        target="_blank"
-        rel="noreferrer"
+        onClick={() => onOpen(p.name)}
         onPointerEnter={(e) => onInk(e.clientX, e.clientY)}
       >
         <div className="work-top">
@@ -184,7 +192,7 @@ function WorkRow({ p, i, onInk, ghost }) {
             </ul>
           </div>
         </div>
-      </a>
+      </button>
     </li>
   );
 }
@@ -235,7 +243,7 @@ function SkillsBoard({ active, onToggle, onClear }) {
                   aria-pressed={active.includes(it.name)}
                   onClick={() => onToggle(it.name)}
                 >
-                  {it.name}
+                  {it.name}<span className="chip-count">→ {it.refs.length} BUILD{it.refs.length === 1 ? '' : 'S'}</span>
                 </button>
               ))}
             </div>
@@ -277,27 +285,56 @@ function SkillsBoard({ active, onToggle, onClear }) {
 /* ----------------------------------------------------------------- app */
 
 export default function App() {
-  const reduced = useRef(prefersReduced()).current;
+  const reduced = useMedia('(prefers-reduced-motion: reduce)');
+  const fine = useMedia('(pointer: fine)');
   const [activeSkills, setActiveSkills] = useState([]);
+  const [sheet, setSheet] = useState(() => location.hash.match(/^#\/sheet\/([^/]+)/)?.[1] || null);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'day');
   const selSkills = SKILLS.flatMap((g) => g.items).filter((it) => activeSkills.includes(it.name));
   const toggleSkill = (n) =>
     setActiveSkills((prev) => (prev.includes(n) ? prev.filter((x) => x !== n) : [...prev, n]));
-  const fine = useRef(
-    typeof matchMedia !== 'undefined' && matchMedia('(pointer: fine)').matches,
-  ).current;
-
   const canvasRef = useRef(null);
   const plotterRef = useRef(null);
   const heroRef = useRef(null);
 
   useKineticTitle(heroRef, !reduced && fine);
 
+  useEffect(() => {
+    const onHash = () => setSheet(location.hash.match(/^#\/sheet\/([^/]+)/)?.[1] || null);
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+
+  useEffect(() => {
+    const onKey = (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setPaletteOpen((value) => !value);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  const setScheme = (next) => {
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem('portfolio-theme', next);
+    setTheme(next);
+  };
+  const toggleTheme = () => setScheme(theme === 'night' ? 'day' : 'night');
+  const openSheet = (slug) => { location.hash = `/sheet/${slug}`; };
+  const closeSheet = () => {
+    history.replaceState(null, '', `${location.pathname}${location.search}`);
+    setSheet(null);
+  };
+
   // Plotter background
   useEffect(() => {
-    const plotter = createPlotter(canvasRef.current, { reducedMotion: reduced });
+    const plotter = createPlotter(canvasRef.current, { reducedMotion: reduced, scheme: theme, visibilityTarget: heroRef.current });
     plotterRef.current = plotter;
     return () => plotter.destroy();
-  }, [reduced]);
+  }, [reduced, theme]);
 
   // Scroll reveals
   useEffect(() => {
@@ -370,6 +407,19 @@ export default function App() {
   }, []);
 
   const ink = (x, y) => plotterRef.current && plotterRef.current.burst(x, y);
+  const sections = [
+    { id: 'main', no: '01' }, { id: 'experience', no: '02' }, { id: 'work', no: '03' },
+    { id: 'skills', no: '04' }, { id: 'archive', no: '05' }, { id: 'contact', no: '06' },
+  ];
+  const paletteEntries = [
+    ...sections.map((section) => ({ kind: `§ ${section.no}`, label: section.id === 'main' ? 'Introduction' : section.id[0].toUpperCase() + section.id.slice(1), action: () => document.getElementById(section.id)?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' }) })),
+    ...PROJECTS_FEATURED.map((project) => ({ kind: 'BUILD', label: project.label, action: () => openSheet(project.name) })),
+    ...PROJECTS_MORE.map((project) => ({ kind: 'ARCHIVE', label: project.label, action: () => window.open(project.href, '_blank', 'noopener,noreferrer') })),
+    { kind: 'ACTION', label: 'Download resume', action: () => window.open('/resume.pdf', '_blank', 'noopener,noreferrer') },
+    { kind: 'ACTION', label: 'Copy email', action: () => navigator.clipboard.writeText(CONTACT.email) },
+    { kind: 'ACTION', label: 'Open GitHub', action: () => window.open(CONTACT.github, '_blank', 'noopener,noreferrer') },
+    { kind: 'ACTION', label: 'Toggle blueprint mode', action: toggleTheme },
+  ];
 
   return (
     <>
@@ -379,6 +429,7 @@ export default function App() {
       <canvas ref={canvasRef} className="plotter" aria-hidden="true" />
       <div className="grid-overlay" aria-hidden="true" />
       <Crosshair enabled={fine && !reduced} />
+      <ScrollRail sections={sections} />
 
       <header className="topbar">
         <span className="mark mono">
@@ -390,6 +441,12 @@ export default function App() {
           <a href="#skills">SKILLS</a>
           <a href="#contact">CONTACT</a>
         </nav>
+        <div className="top-actions mono">
+          <button type="button" className="index-trigger" onClick={() => setPaletteOpen(true)}>⌘K INDEX</button>
+          <button type="button" className="theme-toggle" onClick={toggleTheme} aria-label={`Use ${theme === 'night' ? 'day' : 'night'} color scheme`}>
+            {theme === 'night' ? 'DAY PLOT' : 'NIGHT PLOT'}
+          </button>
+        </div>
         <Clock />
       </header>
 
@@ -447,9 +504,9 @@ export default function App() {
             <a className="btn mono" href="/resume.pdf" target="_blank" rel="noreferrer">
               RESUME ↗︎
             </a>
-            <a className="btn btn-solid mono" href={`mailto:${CONTACT.email}`}>
+            <CopyEmail email={CONTACT.email} className="btn btn-solid mono">
               EMAIL ME
-            </a>
+            </CopyEmail>
           </div>
         </section>
 
@@ -501,7 +558,7 @@ export default function App() {
           />
           <ol className="works">
             {PROJECTS_FEATURED.map((p, i) => (
-              <WorkRow key={p.name} p={p} i={i} onInk={ink} ghost={!matchesSkills(p, selSkills)} />
+              <WorkRow key={p.name} p={p} i={i} onInk={ink} ghost={!matchesSkills(p, selSkills)} onOpen={openSheet} />
             ))}
           </ol>
         </section>
@@ -572,7 +629,7 @@ export default function App() {
         </section>
 
         {/* ------------------------------------------------- archive */}
-        <section className="section" aria-label="Project archive">
+        <section id="archive" className="section" aria-label="Project archive">
           <SectionHead
             no="05"
             title="ARCHIVE"
@@ -597,9 +654,9 @@ export default function App() {
         {/* ------------------------------------------------- contact */}
         <section id="contact" className="section contact" aria-label="Contact">
           <SectionHead no="06" title="GET IN TOUCH" note="NO FORM. JUST MAIL." />
-          <a className="mail" href={`mailto:${CONTACT.email}`} data-reveal>
+          <CopyEmail email={CONTACT.email} className="mail" data-reveal>
             {CONTACT.email}
-          </a>
+          </CopyEmail>
           <div className="contact-links mono" data-reveal style={{ '--i': 1 }}>
             <a href={`tel:+1${CONTACT.phone.replace(/-/g, '')}`}>{CONTACT.phone}</a>
             <a href={CONTACT.github} target="_blank" rel="noreferrer">
@@ -623,6 +680,8 @@ export default function App() {
         </p>
         <p className="mono footer-hint">PRESS “G” TO TOGGLE THE DRAFTING GRID.</p>
       </footer>
+      <CaseStudySheet slug={sheet} onClose={closeSheet} />
+      <CommandPalette open={paletteOpen} entries={paletteEntries} onClose={() => setPaletteOpen(false)} />
     </>
   );
 }

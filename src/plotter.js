@@ -18,7 +18,7 @@ function fieldAngle(x, y, t) {
   return a * 1.15;
 }
 
-export function createPlotter(canvas, { reducedMotion = false } = {}) {
+export function createPlotter(canvas, { reducedMotion = false, scheme = 'day', visibilityTarget = canvas } = {}) {
   const ctx = canvas.getContext('2d', { alpha: true });
   let W = 0;
   let H = 0;
@@ -31,8 +31,10 @@ export function createPlotter(canvas, { reducedMotion = false } = {}) {
   const fine = matchMedia('(pointer: fine)').matches;
   const pointer = { x: -9999, y: -9999, vx: 0, vy: 0, on: false };
 
-  const INK = 'rgba(25, 23, 18,';
+  const INK = scheme === 'night' ? 'rgba(235, 232, 218,' : 'rgba(25, 23, 18,';
   const BLUE = 'rgba(216, 65, 12,';
+  const PAPER = scheme === 'night' ? 'rgba(10, 25, 43,' : 'rgba(238, 233, 224,';
+  let canvasVisible = true;
 
   let particles = [];
 
@@ -56,13 +58,16 @@ export function createPlotter(canvas, { reducedMotion = false } = {}) {
     ctx.lineCap = 'round';
     const count = Math.round(Math.min(280, Math.max(120, (W * H) / 6200)));
     particles = Array.from({ length: count }, () => spawn({}));
+    if (reducedMotion) {
+      for (let i = 0; i < 700; i++) step(1);
+    }
   }
 
   function step(dt) {
     // Slow fade so the sheet never turns to mud, but strokes linger.
     frame++;
     if (frame % 3 === 0) {
-      ctx.fillStyle = 'rgba(238, 233, 224, 0.012)';
+      ctx.fillStyle = PAPER + ' 0.012)';
       ctx.fillRect(0, 0, W, H);
     }
 
@@ -113,7 +118,7 @@ export function createPlotter(canvas, { reducedMotion = false } = {}) {
   }
 
   function start() {
-    if (running || reducedMotion) return;
+    if (running || reducedMotion || document.hidden || !canvasVisible) return;
     running = true;
     last = 0;
     raf = requestAnimationFrame(loop);
@@ -128,6 +133,14 @@ export function createPlotter(canvas, { reducedMotion = false } = {}) {
     if (document.hidden) stop();
     else start();
   }
+
+  const observer = 'IntersectionObserver' in window
+    ? new IntersectionObserver(([entry]) => {
+        canvasVisible = entry.isIntersecting;
+        if (canvasVisible) start();
+        else stop();
+      })
+    : null;
 
   function onPointerMove(e) {
     pointer.x = e.clientX;
@@ -156,14 +169,14 @@ export function createPlotter(canvas, { reducedMotion = false } = {}) {
   resize();
   window.addEventListener('resize', resize);
   document.addEventListener('visibilitychange', onVisibility);
+  observer?.observe(visibilityTarget);
   if (fine) {
     window.addEventListener('pointermove', onPointerMove, { passive: true });
     document.documentElement.addEventListener('pointerleave', onPointerLeave);
   }
 
   if (reducedMotion) {
-    // Dignified static fallback: plot the whole drawing once, synchronously.
-    for (let i = 0; i < 700; i++) step(1);
+    // resize() plotted a completed static drawing synchronously.
   } else {
     start();
   }
@@ -174,6 +187,7 @@ export function createPlotter(canvas, { reducedMotion = false } = {}) {
       stop();
       window.removeEventListener('resize', resize);
       document.removeEventListener('visibilitychange', onVisibility);
+      observer?.disconnect();
       if (fine) {
         window.removeEventListener('pointermove', onPointerMove);
         document.documentElement.removeEventListener('pointerleave', onPointerLeave);
