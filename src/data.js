@@ -65,7 +65,7 @@ export const EXPERIENCE = [
   },
 ];
 
-/* Five live demos — each links to its deployed URL. */
+/* Six live demos — each links to its deployed URL. */
 export const PROJECTS_FEATURED = [
   {
     name: 'working-drawing',
@@ -91,9 +91,9 @@ export const PROJECTS_FEATURED = [
     name: 'neuron',
     label: 'Neuron — Project Database',
     type: 'Full Stack',
-    highlight: 'LIVE — 18 PROJECTS CATALOGUED',
+    highlight: 'LIVE — SEARCHABLE PROJECT CATALOGUE',
     tech: ['FastAPI', 'TypeScript', 'SQLAlchemy', 'Neon'],
-    desc: 'PMO-style database of 18 CS projects with keyword search, tag filtering, and difficulty categorization via RESTful API.',
+    desc: 'PMO-style database of CS projects with keyword search, tag filtering, and difficulty categorization via RESTful API.',
     href: 'https://neuron-database.vercel.app',
     period: 'LIVE',
   },
@@ -117,11 +117,21 @@ export const PROJECTS_FEATURED = [
     href: 'https://scribbly-collab.vercel.app',
     period: 'LIVE',
   },
+  {
+    name: 'latent-field',
+    label: 'Latent Field — Generative AI',
+    type: 'AI / Graphics',
+    highlight: 'LIVE — FEELING INTO LIGHT',
+    tech: ['WebGL', 'Gemini', 'Structured Output', 'Vercel'],
+    desc: 'Describe a feeling and Gemini maps it to structured shader parameters while a hand-written WebGL field smoothly morphs to match.',
+    href: 'https://latent-field.vercel.app',
+    period: 'LIVE',
+  },
 ];
 
 export const PROJECTS_MORE = [
   { name: 'enterprise-ai-ops-hub', label: 'Enterprise AI Ops Hub', tech: 'LangGraph · Kubernetes', href: `${GH}/enterprise-ai-ops-hub` },
-  { name: 'Prophecy', label: 'Prophecy — AI Risk Assessor', tech: 'LightGBM · HackUTD XI', href: GH },
+  { name: 'Prophecy', label: 'Prophecy — AI Risk Assessor', tech: 'LightGBM · HackUTD XI · DEVPOST', href: 'https://devpost.com/software/proficie' },
   { name: 'SentimentAnalysis', label: 'NLP Sentiment Analysis', tech: 'PyTorch · GloVe', href: `${GH}/SentimentAnalysis` },
   { name: 'multi-agent-workflow-engine', label: 'Multi-Agent Workflow Engine', tech: 'TypeScript · LangChain', href: `${GH}/multi-agent-workflow-engine` },
   { name: 'ai-code-review-pipeline', label: 'AI Code Review Pipeline', tech: 'Python · Claude API', href: `${GH}/ai-code-review-pipeline` },
@@ -147,7 +157,7 @@ const REF = {
   neurosurge: R('Neurosurge — second brain', 'https://neurosurge.vercel.app'),
   scribbly: R('Scribbly — whiteboard', 'https://scribbly-collab.vercel.app'),
   aiops: R('Enterprise AI Ops Hub', `${GH}/enterprise-ai-ops-hub`),
-  prophecy: R('Prophecy — AI risk assessor', GH),
+  prophecy: R('Prophecy — AI risk assessor', 'https://devpost.com/software/proficie'),
   sentiment: R('NLP Sentiment Analysis', `${GH}/SentimentAnalysis`),
   mawe: R('Multi-Agent Workflow Engine', `${GH}/multi-agent-workflow-engine`),
   codereview: R('AI Code Review Pipeline', `${GH}/ai-code-review-pipeline`),
