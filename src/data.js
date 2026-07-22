@@ -65,7 +65,7 @@ export const EXPERIENCE = [
   },
 ];
 
-/* Five live demos — each links to its deployed URL. */
+/* Six live demos — each links to its deployed URL. */
 export const PROJECTS_FEATURED = [
   {
     name: 'working-drawing',
@@ -115,6 +115,16 @@ export const PROJECTS_FEATURED = [
     tech: ['React', 'Canvas', 'FastAPI', 'Neon'],
     desc: 'Persistent whiteboard: freehand canvas drawing with boards saved server-side, so nothing is lost on refresh.',
     href: 'https://scribbly-collab.vercel.app',
+    period: 'LIVE',
+  },
+  {
+    name: 'latent-field',
+    label: 'Latent Field — Generative AI',
+    type: 'AI / Graphics',
+    highlight: 'LIVE — FEELING INTO LIGHT',
+    tech: ['WebGL', 'Gemini', 'Structured Output', 'Vercel'],
+    desc: 'Describe a feeling and Gemini maps it to structured shader parameters while a hand-written WebGL field smoothly morphs to match.',
+    href: 'https://latent-field.vercel.app',
     period: 'LIVE',
   },
 ];

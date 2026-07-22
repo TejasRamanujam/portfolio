@@ -76,4 +76,19 @@ export const CASE_STUDIES = {
     live: 'https://scribbly-collab.vercel.app',
     repo: `${GH}/Scribbly-Collaborative-Whiteboard`,
   },
+  'latent-field': {
+    sheet: '03·F',
+    title: 'Latent Field — Generative AI',
+    problem: 'Text-to-image systems usually return a finished artifact. Latent Field instead turns a phrase into a continuously evolving visual system, keeping the model output structured, inspectable, and safe to interpolate in real time.',
+    architecture: ['Prompt', 'Vercel function', 'Gemini JSON', 'WebGL uniforms'],
+    decisions: [
+      'Constrain Gemini with a strict schema so model output maps directly to known rendering parameters.',
+      'Interpolate current and target uniforms every frame so new moods breathe into the field instead of cutting abruptly.',
+      'Use a deterministic phrase-seeded fallback when Gemini or its API key is unavailable.',
+      'Keep the renderer as raw WebGL with one quad and no framework or build step.',
+    ],
+    stack: ['WebGL', 'GLSL', 'Gemini 2.5 Flash', 'Vercel Functions'],
+    live: 'https://latent-field.vercel.app',
+    repo: `${GH}/latent-field`,
+  },
 };
